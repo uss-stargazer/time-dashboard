@@ -32,9 +32,14 @@ export function ClientProvider({
 
   useEffect(() => {
     const raw = localStorage.getItem(storageKey);
-    if (raw !== null) setClients(ClientArraySchema.parse(JSON.parse(raw)));
+    if (raw !== null) {
+      const clients = ClientArraySchema.parse(JSON.parse(raw));
+      if (new Set(clients.map((c) => c.name)).size !== clients.length)
+        throw new Error("Invalid stored clients: has duplicate client names");
+      setClients(clients);
+    }
     setIsLoading(false);
-  });
+  }, []);
 
   const clientsObj: ClientContextType = {
     isLoading,
