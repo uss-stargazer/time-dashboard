@@ -68,19 +68,20 @@ function ClientForm({
 
   return (
     <FormProvider {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)}>
+      <form
+        onSubmit={form.handleSubmit((client: Client) => {
+          // This check should really be a validate() option in the FormField, but I can't get it to work
+          if (invalidNames.includes(client.name)) {
+            form.setError("name", { message: "Name must be unique." });
+          } else onSubmit(client);
+        })}
+      >
         <FormField
           type="text"
           placeholder="Name"
           name="name"
           register={form.register}
           error={form.formState.errors.name}
-          options={{
-            validate: (name) =>
-              typeof name === "string" && !invalidNames.includes(name)
-                ? true
-                : "Client name must be unique",
-          }}
         />
         <FormField
           type="number"
