@@ -7,6 +7,7 @@ import {
   useState,
   type PropsWithChildren,
 } from "react";
+import { ErrorBoundary } from "react-error-boundary";
 
 const ClientArraySchema = z.array(ClientSchema);
 
@@ -17,16 +18,16 @@ type ClientContextType = {
 };
 const ClientContext = createContext<ClientContextType | null>(null);
 
-export function ClientProvider({
+type ClientProviderProps = PropsWithChildren<{
+  storageKey: string;
+  defaultClients: Client[];
+}>;
+
+function ClientProviderNoCatch({
   children,
-  storageKey = "clients",
-  defaultClients = [],
-}: PropsWithChildren<
-  Partial<{
-    storageKey: string;
-    defaultClients: Client[];
-  }>
->) {
+  storageKey,
+  defaultClients,
+}: ClientProviderProps) {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [clients, setClients] = useState<Client[]>(defaultClients);
 
@@ -56,6 +57,39 @@ export function ClientProvider({
     </ClientContext.Provider>
   );
 }
+
+export const ClientProvider = ({
+  children,
+  storageKey = "clients",
+  defaultClients = [],
+}: Partial<ClientProviderProps>) => (
+  <ErrorBoundary
+    FallbackComponent={({ error, resetErrorBoundary }) => (
+      <>
+        <h4>
+          Data stored locally is broken! Either fix it or{" "}
+          <a
+            onClick={() => {
+              localStorage.removeItem(storageKey);
+              resetErrorBoundary();
+            }}
+          >
+            reset localStorage
+          </a>
+          .
+        </h4>
+        {error instanceof Error && <span>{error.message}</span>}
+      </>
+    )}
+  >
+    <ClientProviderNoCatch
+      storageKey={storageKey}
+      defaultClients={defaultClients}
+    >
+      {children}
+    </ClientProviderNoCatch>
+  </ErrorBoundary>
+);
 
 const useClients = (): ClientContextType => {
   const clients = useContext(ClientContext);
