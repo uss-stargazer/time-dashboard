@@ -1,16 +1,28 @@
-import { OrbitProgress } from "react-loading-indicators";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  AppBar,
+  Box,
+  Button,
+  createTheme,
+  IconButton,
+  ThemeProvider,
+  Toolbar,
+  Typography,
+} from "@mui/material";
 import ClientForm from "./components/ClientForm";
 import useClients, { ClientProvider } from "./hooks/useClients";
 import type { Client } from "./modules/clients";
-import { FaPlusCircle } from "react-icons/fa";
 import { useState } from "react";
+import { Add, ExpandMore, Settings } from "@mui/icons-material";
 
 function ClientEditor() {
   const clientData = useClients();
   const [stagedClient, setStagedClient] = useState<Partial<Client> | null>(
     null,
   );
-  if (clientData.isLoading) return <OrbitProgress />;
+  if (clientData.isLoading) return <Button loading variant="outlined" />;
 
   const clientNames = clientData.clients.map((c) => c.name);
   const addClient = (client: Client) => {
@@ -28,7 +40,7 @@ function ClientEditor() {
   };
 
   return (
-    <div>
+    <Box>
       {[
         ...clientData.clients.map((client) => (
           <ClientForm
@@ -49,10 +61,12 @@ function ClientEditor() {
             }}
           />
         ) : (
-          <FaPlusCircle onClick={() => setStagedClient({})} />
+          <IconButton onClick={() => setStagedClient({})}>
+            <Add />
+          </IconButton>
         ),
       ]}
-    </div>
+    </Box>
   );
 }
 
@@ -60,15 +74,58 @@ function Dashboard() {
   return <div>Dashboard</div>;
 }
 
+const theme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#ef6c00",
+    },
+    secondary: {
+      main: "#42a5f5",
+    },
+  },
+  typography: { fontFamily: "'Fira Mono', monospace" },
+});
+
 function App() {
   return (
-    <ClientProvider>
-      <h1>Time, Dr. Freeman? Is it really that... time again? </h1>
-      <Dashboard />
-      <div>
-        <ClientEditor />
-      </div>
-    </ClientProvider>
+    <ThemeProvider theme={theme}>
+      <ClientProvider>
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Box>
+            <AppBar position="static">
+              <Toolbar>
+                <Typography color="primary">Time Dashboard</Typography>
+              </Toolbar>
+            </AppBar>
+          </Box>
+
+          <Box
+            sx={{
+              flexGrow: 1,
+              p: "1rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
+          >
+            <Dashboard />
+
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Box display="flex" gap="1rem">
+                  <Settings />
+                  <Typography component="span">Edit clients</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <ClientEditor />
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        </Box>
+      </ClientProvider>
+    </ThemeProvider>
   );
 }
 
