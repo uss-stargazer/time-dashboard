@@ -1,4 +1,3 @@
-import Select from "react-select";
 import { ClientSchema, type Client } from "../modules/clients";
 import trackers, { trackerNames, type TrackerName } from "../modules/trackers";
 import {
@@ -6,14 +5,20 @@ import {
   FormProvider,
   useForm,
   useFormContext,
-  type FieldError,
-  type FieldErrorsImpl,
-  type Merge,
 } from "react-hook-form";
-import FormField from "./FormField";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { KeyOfUnion } from "../modules/util";
+import {
+  Box,
+  Button,
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+} from "@mui/material";
+import { FormNumberField, FormTextField } from "./FormField";
 
 function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
   const form = useFormContext<Client>();
@@ -23,20 +28,9 @@ function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
       {Object.keys(clientDataSchema.shape).map((key) => {
         const field = key as KeyOfUnion<(typeof clientDataSchema)["shape"]>;
         return (
-          <FormField
-            type="text"
-            placeholder={field}
+          <FormTextField
             name={`tracker.data.${field}`}
-            register={form.register}
-            error={
-              form.formState.errors.tracker?.data &&
-              (
-                form.formState.errors.tracker?.data as Merge<
-                  FieldError,
-                  FieldErrorsImpl<{ [key: string]: string }>
-                >
-              )[field]
-            }
+            control={form.control}
           />
         );
       })}
@@ -76,50 +70,53 @@ function ClientForm({
           } else onSubmit(client);
         })}
       >
-        <FormField
-          type="text"
-          placeholder="Name"
-          name="name"
-          register={form.register}
-          error={form.formState.errors.name}
-        />
-        <FormField
-          type="number"
-          placeholder="Rate amount"
-          name="hourlyRate.amount"
-          register={form.register}
-          error={form.formState.errors.hourlyRate?.amount}
-          options={{ valueAsNumber: true }}
-        />
-        <FormField
-          type="text"
-          placeholder="Rate currency"
-          name="hourlyRate.currency"
-          register={form.register}
-          error={form.formState.errors.hourlyRate?.currency}
-        />
+        <FormTextField placeholder="Name" name="name" control={form.control} />
+        <Box sx={{ display: "flex" }}>
+          <FormNumberField
+            placeholder="Rate amount"
+            name="hourlyRate.amount"
+            control={form.control}
+          />
+          <FormTextField
+            placeholder="Currency"
+            name="hourlyRate.currency"
+            control={form.control}
+          />
+        </Box>
         <Controller
           control={form.control}
           name="tracker.name"
-          render={({ field: { value, onChange, onBlur, ref } }) => (
-            <Select
-              value={trackerOptions.find((opt) => opt.value === value)}
-              isSearchable
-              name="tracker"
-              ref={ref}
-              options={trackerOptions}
-              onBlur={onBlur}
-              onChange={(option) => {
-                onChange(option?.value);
-                setTrackerName(option?.value);
-              }}
-            />
+          render={({
+            field: { value, onChange, onBlur, ref, name },
+            fieldState: { error },
+          }) => (
+            <FormControl error={error && true}>
+              <InputLabel>Tracker</InputLabel>
+              <Select
+                name={name}
+                label="Tracker"
+                value={value}
+                onChange={(option) => {
+                  onChange(option.target.value);
+                  setTrackerName(option.target.value);
+                }}
+                onBlur={onBlur}
+                inputRef={ref}
+              >
+                {trackerOptions.map((option) => (
+                  <MenuItem key={option.label} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))}
+              </Select>
+              {error && <FormHelperText>{error.message}</FormHelperText>}
+            </FormControl>
           )}
         />
 
         {trackerName && <ClientDataForm trackerName={trackerName} />}
 
-        <button type="submit">Submit</button>
+        <Button type="submit">Submit</Button>
       </form>
     </FormProvider>
   );

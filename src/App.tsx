@@ -1,16 +1,24 @@
-import { OrbitProgress } from "react-loading-indicators";
+import {
+  Accordion,
+  AccordionDetails,
+  AccordionSummary,
+  Box,
+  Button,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import ClientForm from "./components/ClientForm";
 import useClients, { ClientProvider } from "./hooks/useClients";
 import type { Client } from "./modules/clients";
-import { FaPlusCircle } from "react-icons/fa";
 import { useState } from "react";
+import { Add, ExpandMore } from "@mui/icons-material";
 
 function ClientEditor() {
   const clientData = useClients();
   const [stagedClient, setStagedClient] = useState<Partial<Client> | null>(
     null,
   );
-  if (clientData.isLoading) return <OrbitProgress />;
+  if (clientData.isLoading) return <Button loading variant="outlined" />;
 
   const clientNames = clientData.clients.map((c) => c.name);
   const addClient = (client: Client) => {
@@ -28,7 +36,7 @@ function ClientEditor() {
   };
 
   return (
-    <div>
+    <Box>
       {[
         ...clientData.clients.map((client) => (
           <ClientForm
@@ -49,10 +57,12 @@ function ClientEditor() {
             }}
           />
         ) : (
-          <FaPlusCircle onClick={() => setStagedClient({})} />
+          <IconButton onClick={() => setStagedClient({})}>
+            <Add />
+          </IconButton>
         ),
       ]}
-    </div>
+    </Box>
   );
 }
 
@@ -70,11 +80,24 @@ function Dashboard() {
 function App() {
   return (
     <ClientProvider>
-      <h1>Time, Dr. Freeman? Is it really that... time again? </h1>
+      <Typography variant="h2">
+        Time, Dr. Freeman? Is it really that... time again?
+      </Typography>
+
       <Dashboard />
-      <div>
-        <ClientEditor />
-      </div>
+
+      <Accordion>
+        <AccordionSummary
+          expandIcon={<ExpandMore />}
+          aria-controls="panel1-content"
+          id="panel1-header"
+        >
+          <Typography component="span">Edit clients</Typography>
+        </AccordionSummary>
+        <AccordionDetails>
+          <ClientEditor />
+        </AccordionDetails>
+      </Accordion>
     </ClientProvider>
   );
 }
