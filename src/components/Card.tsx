@@ -10,7 +10,6 @@ function Card({
     <Box
       {...props}
       sx={{
-        ...props.sx,
         p: "1rem",
         maxWidth: "25em",
         width: fullWidth ? "25em" : undefined,
@@ -18,6 +17,7 @@ function Card({
         borderColor: "primary.dark",
         borderRadius: "7px",
         bgcolor: "grey.900",
+        ...props.sx,
       }}
     >
       {children}
