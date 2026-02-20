@@ -44,11 +44,13 @@ function ClientForm({
   invalidNames,
   submitText = "Submit",
   onSubmit,
+  otherButtons,
 }: {
   client: Partial<Client>;
   invalidNames: string[];
   submitText?: string;
   onSubmit: (updated: Client) => void;
+  otherButtons?: { label: string; onClick: () => void }[];
 }) {
   const form = useForm<Client>({
     resolver: zodResolver(ClientSchema),
@@ -128,9 +130,16 @@ function ClientForm({
 
         <br />
 
-        <Button type="submit" variant="contained">
-          {submitText}
-        </Button>
+        <Box sx={{ display: "flex", gap: 1 }}>
+          <Button type="submit" variant="contained">
+            {submitText}
+          </Button>
+          {otherButtons?.map((btn) => (
+            <Button variant="outlined" onClick={btn.onClick}>
+              {btn.label}
+            </Button>
+          ))}
+        </Box>
       </Card>
     </FormProvider>
   );
