@@ -2,7 +2,6 @@ import { Box, Button, Typography } from "@mui/material";
 import ExpectedVsActual from "./ExpectedVsActual";
 import useClients from "../../hooks/useClients";
 import { Info } from "@mui/icons-material";
-import Card from "../Card";
 
 /**
  * @todo Time distribution graph accross clients (top n)
@@ -32,27 +31,7 @@ function Dashboard() {
         </>
       ) : (
         <>
-          {[<ExpectedVsActual />].map((el, idx) => (
-            <Card
-              key={idx}
-              sx={{
-                display: "flex",
-                flexDirection: {
-                  xs: "column",
-                  sm: "column",
-                  md: "row",
-                },
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 1,
-                border: "1px solid",
-                borderColor: "primary.main",
-                maxWidth: undefined,
-              }}
-            >
-              {el}
-            </Card>
-          ))}
+          <ExpectedVsActual />
         </>
       )}
     </Box>
