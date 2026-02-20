@@ -41,10 +41,12 @@ function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
 function ClientForm({
   client,
   invalidNames,
+  submitText = "Submit",
   onSubmit,
 }: {
   client: Partial<Client>;
   invalidNames: string[];
+  submitText?: string;
   onSubmit: (updated: Client) => void;
 }) {
   const form = useForm<Client>({
@@ -116,7 +118,9 @@ function ClientForm({
 
         {trackerName && <ClientDataForm trackerName={trackerName} />}
 
-        <Button type="submit">Submit</Button>
+        <Button type="submit" variant="contained">
+          {submitText}
+        </Button>
       </form>
     </FormProvider>
   );
