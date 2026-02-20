@@ -169,6 +169,9 @@ function ClientEditor({
             <Editor />
           </Box>
         </SwipeableDrawer>
+
+        {/* Empty box to make sure no elements can hide behind the drawer bar */}
+        <Box sx={{ height: `${drawerBleeding}px` }} />
       </Box>
     </>
   );
