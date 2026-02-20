@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import type { Dayjs } from "dayjs";
+import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import useClients from "../../hooks/useClients";
@@ -27,6 +27,10 @@ const EXPECTED_DAILY_HOURS = 8;
 const WEEKEND_DAYS = [0, 6];
 const getExpectedHours = (start: Dayjs, end: Dayjs): number => {
   const daysBetween = end.diff(start, "days");
+  if (Number.isNaN(daysBetween))
+    throw new Error(
+      `getExpectedHours couldn't get days between ${start} and ${end}`,
+    );
   const nWeeks = Math.floor(daysBetween / 7);
   const weekOffset = daysBetween % 7;
   let nWeekDays = nWeeks * 5 + weekOffset;
@@ -45,7 +49,7 @@ const getExpectedHours = (start: Dayjs, end: Dayjs): number => {
 function ExpectedVsActual() {
   const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
   const [startDate, setStartDate] = useState<Dayjs>(() =>
-    dayjs().subtract(1, "year"),
+    dayjs().startOf("month"),
   );
 
   const { clients, isLoading: clientsAreLoading } = useClients();
@@ -187,12 +191,26 @@ function ExpectedVsActual() {
             <DatePicker
               label="From"
               value={startDate}
-              onChange={(value) => value && setStartDate(value)}
+              onChange={(value, { validationError }) =>
+                value &&
+                value.isValid() &&
+                !validationError &&
+                setStartDate(value)
+              }
+              maxDate={endDate}
+              disableFuture
             />
             <DatePicker
               label="To"
               value={endDate}
-              onChange={(value) => value && setEndDate(value)}
+              onChange={(value, { validationError }) =>
+                value &&
+                value.isValid() &&
+                !validationError &&
+                setEndDate(value)
+              }
+              minDate={startDate}
+              disableFuture
             />
           </LocalizationProvider>
         </Box>
