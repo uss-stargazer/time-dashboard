@@ -99,7 +99,7 @@ const Puller = styled("div")(() => ({
   position: "absolute",
   top: 8,
   left: "calc(50% - 15px)",
-  backgroundColor: grey[600],
+  backgroundColor: grey[500],
   borderRadius: 3,
   cursor: "pointer",
 }));
@@ -146,6 +146,7 @@ function ClientEditor({
               right: 0,
               left: 0,
               height: `${drawerBleeding}px`,
+              bgcolor: "primary.dark",
             }}
           >
             <Puller />
