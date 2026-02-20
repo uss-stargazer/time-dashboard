@@ -3,6 +3,7 @@ import ExpectedVsActual from "./ExpectedVsActual";
 import useClients from "../../hooks/useClients";
 import { Info } from "@mui/icons-material";
 import DashboardPane from "./DashboardPane";
+import Monthly from "./Monthly";
 
 /**
  * @todo Time distribution graph accross clients (top n)
@@ -32,7 +33,7 @@ function Dashboard() {
         </>
       ) : (
         <>
-          {[<ExpectedVsActual />].map((pane) => (
+          {[<ExpectedVsActual />, <Monthly />].map((pane) => (
             <DashboardPane>{pane}</DashboardPane>
           ))}
         </>
