@@ -16,6 +16,7 @@ import useClients, { ClientProvider } from "./hooks/useClients";
 import type { Client } from "./modules/clients";
 import { useState } from "react";
 import { Add, Dashboard, ExpandMore, Settings } from "@mui/icons-material";
+import Card from "./components/Card";
 
 function ClientEditor() {
   const clientData = useClients();
@@ -40,7 +41,13 @@ function ClientEditor() {
   };
 
   return (
-    <Box>
+    <Box
+      sx={{
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 2,
+      }}
+    >
       {[
         ...clientData.clients.map((client) => (
           <ClientForm
@@ -63,9 +70,11 @@ function ClientEditor() {
             }}
           />
         ) : (
-          <IconButton onClick={() => setStagedClient({})}>
-            <Add />
-          </IconButton>
+          <Card fullWidth sx={{ display: "flex" }}>
+            <Button sx={{ flexGrow: 1 }} onClick={() => setStagedClient({})}>
+              <Add />
+            </Button>
+          </Card>
         ),
       ]}
     </Box>
