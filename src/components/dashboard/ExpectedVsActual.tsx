@@ -8,6 +8,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -15,7 +16,12 @@ import type { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import useClients from "../../hooks/useClients";
-import trackers from "../../modules/trackers";
+import trackers, {
+  TrackerError,
+  type TrackerName,
+} from "../../modules/trackers";
+import Card from "../Card";
+import { Error as ErrorIcon } from "@mui/icons-material";
 
 const EXPECTED_DAILY_HOURS = 8;
 const WEEKEND_DAYS = [0, 6];
@@ -43,11 +49,15 @@ function ExpectedVsActual() {
   );
 
   const { clients, isLoading: clientsAreLoading } = useClients();
-  const [actualHours, setActualHours] = useState<number | undefined>(undefined);
   if (clients.length === 0)
     throw new Error("At least 1 client required for ExpectedVsActual");
   if (clientsAreLoading)
     throw new Error("Loaded clients required for ExpectedVsActual");
+
+  const [actualHours, setActualHours] = useState<number | undefined>(undefined);
+  const [error, setError] = useState<
+    { tracker?: TrackerName; clientName?: String; message: string } | undefined
+  >(undefined);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -60,22 +70,39 @@ function ExpectedVsActual() {
       .then(() =>
         Promise.all(
           clients.map((client) =>
-            trackers[client.tracker.name].getBillableHours(
-              startDate.toDate(),
-              endDate.toDate(),
-              // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
-              client.tracker.data,
-              controller.signal,
-            ),
+            trackers[client.tracker.name]
+              .getBillableHours(
+                startDate.toDate(),
+                endDate.toDate(),
+                // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
+                client.tracker.data,
+                controller.signal,
+              )
+              .catch((error) => {
+                if (error instanceof TrackerError)
+                  error.clientName = client.name;
+                throw error;
+              }),
           ),
         ),
       )
+      .catch((error) => {
+        if (error instanceof Error)
+          setError({ ...error, message: error.message });
+        else
+          setError({
+            message: JSON.stringify(error),
+          });
+        return undefined;
+      })
       .then((clientTotalHours) => {
+        if (clientTotalHours) setError(undefined);
         setActualHours(
-          clientTotalHours.reduce(
-            (total, clientHours) => total + clientHours,
-            0,
-          ),
+          clientTotalHours &&
+            clientTotalHours.reduce(
+              (total, clientHours) => total + clientHours,
+              0,
+            ),
         );
       });
 
@@ -83,7 +110,7 @@ function ExpectedVsActual() {
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [startDate, endDate]);
+  }, [clients, startDate, endDate]);
 
   if (clientsAreLoading) return <Button loading />;
 
@@ -124,76 +151,116 @@ function ExpectedVsActual() {
     });
   }
 
+  console.log({ error });
+
   return (
-    <>
+    <Card
+      sx={{
+        borderColor: "primary.main",
+        maxWidth: undefined,
+        display: "flex",
+        flexDirection: "column",
+        gap: 1,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
-          flexDirection: "column",
+          flexDirection: {
+            xs: "column",
+            sm: "column",
+            md: "row",
+          },
+          justifyContent: "center",
+          alignItems: "center",
           gap: 1,
         }}
       >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label="From"
-            value={startDate}
-            onChange={(value) => value && setStartDate(value)}
-          />
-          <DatePicker
-            label="To"
-            value={endDate}
-            onChange={(value) => value && setEndDate(value)}
-          />
-        </LocalizationProvider>
-      </Box>
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            gap: 1,
+          }}
+        >
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DatePicker
+              label="From"
+              value={startDate}
+              onChange={(value) => value && setStartDate(value)}
+            />
+            <DatePicker
+              label="To"
+              value={endDate}
+              onChange={(value) => value && setEndDate(value)}
+            />
+          </LocalizationProvider>
+        </Box>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "background.paper" }}>
-              <TableCell />
-              <TableCell
-                variant="head"
-                align="center"
-                sx={{ color: "primary.main", width: 10, p: 2 }}
-              >
-                Actual
-              </TableCell>
-              <TableCell
-                variant="head"
-                align="center"
-                sx={{ color: "primary.main", width: 10, p: 2 }}
-              >
-                Expected
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow
-                key={row.name}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell component="th" scope="row" align="right">
-                  {row.name}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "background.paper" }}>
+                <TableCell />
+                <TableCell
+                  variant="head"
+                  align="center"
+                  sx={{ color: "primary.main", width: 10, p: 2 }}
+                >
+                  Actual
                 </TableCell>
-                {/* TODO: currency symbol */}
-                <TableCell align="center" color="primary.main">
-                  {row.actual !== undefined ? (
-                    (Math.round(row.actual * 100) / 100).toLocaleString()
-                  ) : (
-                    <Button loading />
-                  )}
-                </TableCell>
-                <TableCell align="center" color="primary.main">
-                  {(Math.round(row.expected * 100) / 100).toLocaleString()}
+                <TableCell
+                  variant="head"
+                  align="center"
+                  sx={{ color: "primary.main", width: 10, p: 2 }}
+                >
+                  Expected
                 </TableCell>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </>
+            </TableHead>
+            <TableBody>
+              {rows.map((row) => (
+                <TableRow
+                  key={row.name}
+                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                >
+                  <TableCell component="th" scope="row" align="right">
+                    {row.name}
+                  </TableCell>
+                  {/* TODO: currency symbol */}
+                  <TableCell align="center" color="primary.main">
+                    {row.actual !== undefined ? (
+                      (Math.round(row.actual * 100) / 100).toLocaleString()
+                    ) : (
+                      <Button loading />
+                    )}
+                  </TableCell>
+                  <TableCell align="center" color="primary.main">
+                    {(Math.round(row.expected * 100) / 100).toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+
+      {error && (
+        <Card sx={{ maxWidth: undefined, borderColor: "error.main" }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <ErrorIcon color="error" fontSize="small" />
+            <Typography color="error.main" variant="caption">
+              {error.tracker
+                ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ""}`
+                : "Some error"}
+            </Typography>
+          </Box>
+          <Typography variant="caption" m={1}>
+            {error.message}
+          </Typography>
+        </Card>
+      )}
+    </Card>
   );
 }
 
