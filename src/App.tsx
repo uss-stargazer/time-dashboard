@@ -47,6 +47,7 @@ function ClientEditor() {
             key={client.name}
             client={client}
             invalidNames={clientNames.filter((c) => c !== client.name)}
+            submitText="Update"
             onSubmit={(updated) => updateClient(client.name, updated)}
           />
         )),
@@ -55,6 +56,7 @@ function ClientEditor() {
             key="staged"
             client={stagedClient}
             invalidNames={clientNames}
+            submitText="Add"
             onSubmit={(client) => {
               addClient(client);
               setStagedClient(null);
