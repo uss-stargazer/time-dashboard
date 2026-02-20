@@ -8,9 +8,19 @@ type GetBillableHours<ClientData> = (
   signal?: AbortSignal,
 ) => Promise<number>;
 
+export class TrackerError extends Error {
+  public tracker: TrackerName;
+  public clientName?: string;
+  constructor(tracker: TrackerName, message?: string) {
+    super(message);
+    this.tracker = tracker;
+  }
+}
+
 export interface Tracker<ClientDataSchema extends ZodBaseClientData> {
   prettyName: string;
   clientDataSchema: ClientDataSchema;
+  /** @throws {TrackerError} */
   getBillableHours: GetBillableHours<z.infer<ClientDataSchema>>;
 }
 
@@ -23,7 +33,8 @@ const trackers = {
     prettyName: "Sample Tracker 1",
     clientDataSchema: z.object({ apiToken: z.string() }),
     getBillableHours: async (to, from, client) => {
-      if (client.apiToken.length !== 5) throw new Error("invalid apiToken");
+      if (client.apiToken.length !== 5)
+        throw new TrackerError("sample1", "invalid apiToken");
       return (from.getSeconds() - to.getSeconds()) / 3600;
     },
   }),

@@ -32,27 +32,7 @@ function Dashboard() {
         </>
       ) : (
         <>
-          {[<ExpectedVsActual />].map((el, idx) => (
-            <Card
-              key={idx}
-              sx={{
-                display: "flex",
-                flexDirection: {
-                  xs: "column",
-                  sm: "column",
-                  md: "row",
-                },
-                justifyContent: "center",
-                alignItems: "center",
-                gap: 1,
-                border: "1px solid",
-                borderColor: "primary.main",
-                maxWidth: undefined,
-              }}
-            >
-              {el}
-            </Card>
-          ))}
+          <ExpectedVsActual />
         </>
       )}
     </Box>
