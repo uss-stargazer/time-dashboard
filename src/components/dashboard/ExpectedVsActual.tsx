@@ -84,6 +84,7 @@ function ExpectedVsActual() {
         ),
       )
       .catch((err) => {
+        controller.abort();
         error.throw(err);
         return undefined;
       })
