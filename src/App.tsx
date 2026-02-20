@@ -30,6 +30,12 @@ function ClientEditor() {
       throw new Error("Add client: client name must be unique");
     clientData.setClients([...clientData.clients, client]);
   };
+  const removeClient = (clientName: string) => {
+    if (clientData.clients.some((c) => c.name === clientName))
+      clientData.setClients(
+        clientData.clients.filter((c) => c.name !== clientName),
+      );
+  };
   const updateClient = (ogName: string, updated: Client) => {
     if (ogName !== updateClient.name && clientNames.includes(updateClient.name))
       throw new Error("Update client: new client name must be unique");
@@ -55,6 +61,9 @@ function ClientEditor() {
             invalidNames={clientNames.filter((c) => c !== client.name)}
             submitText="Update"
             onSubmit={(updated) => updateClient(client.name, updated)}
+            otherButtons={[
+              { label: "Remove", onClick: () => removeClient(client.name) },
+            ]}
           />
         )),
         stagedClient ? (
@@ -67,6 +76,9 @@ function ClientEditor() {
               addClient(client);
               setStagedClient(null);
             }}
+            otherButtons={[
+              { label: "Cancel", onClick: () => setStagedClient(null) },
+            ]}
           />
         ) : (
           <Card fullWidth sx={{ display: "flex" }}>
