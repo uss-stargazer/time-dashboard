@@ -90,7 +90,7 @@ function ClientForm({
             field: { value, onChange, onBlur, ref, name },
             fieldState: { error },
           }) => (
-            <FormControl error={error && true}>
+            <FormControl sx={{ minWidth: 120 }} error={error && true}>
               <InputLabel>Tracker</InputLabel>
               <Select
                 name={name}

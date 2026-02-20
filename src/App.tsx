@@ -2,16 +2,20 @@ import {
   Accordion,
   AccordionDetails,
   AccordionSummary,
+  AppBar,
   Box,
   Button,
+  createTheme,
   IconButton,
+  ThemeProvider,
+  Toolbar,
   Typography,
 } from "@mui/material";
 import ClientForm from "./components/ClientForm";
 import useClients, { ClientProvider } from "./hooks/useClients";
 import type { Client } from "./modules/clients";
 import { useState } from "react";
-import { Add, ExpandMore } from "@mui/icons-material";
+import { Add, Dashboard, ExpandMore, Settings } from "@mui/icons-material";
 
 function ClientEditor() {
   const clientData = useClients();
@@ -66,39 +70,58 @@ function ClientEditor() {
   );
 }
 
-/**
- * Dashboard features:
- * - Expected vs actual over time period
- *    - Calculate expected at average of all rates, min, and max
- *
- * @todo Time distribution graph accross clients (top n)
- */
-function Dashboard() {
-  return <div></div>;
-}
+const theme = createTheme({
+  palette: {
+    mode: "dark",
+    primary: {
+      main: "#ef6c00",
+    },
+    secondary: {
+      main: "#42a5f5",
+    },
+  },
+  typography: { fontFamily: "'Fira Mono', monospace" },
+});
 
 function App() {
   return (
-    <ClientProvider>
-      <Typography variant="h2">
-        Time, Dr. Freeman? Is it really that... time again?
-      </Typography>
+    <ThemeProvider theme={theme}>
+      <ClientProvider>
+        <Box sx={{ display: "flex", flexDirection: "column" }}>
+          <Box>
+            <AppBar position="static">
+              <Toolbar>
+                <Typography color="primary">Time Dashboard</Typography>
+              </Toolbar>
+            </AppBar>
+          </Box>
 
-      <Dashboard />
+          <Box
+            sx={{
+              flexGrow: 1,
+              p: "1rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "1rem",
+            }}
+          >
+            <Dashboard />
 
-      <Accordion>
-        <AccordionSummary
-          expandIcon={<ExpandMore />}
-          aria-controls="panel1-content"
-          id="panel1-header"
-        >
-          <Typography component="span">Edit clients</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          <ClientEditor />
-        </AccordionDetails>
-      </Accordion>
-    </ClientProvider>
+            <Accordion>
+              <AccordionSummary expandIcon={<ExpandMore />}>
+                <Box display="flex" gap="1rem">
+                  <Settings />
+                  <Typography component="span">Edit clients</Typography>
+                </Box>
+              </AccordionSummary>
+              <AccordionDetails>
+                <ClientEditor />
+              </AccordionDetails>
+            </Accordion>
+          </Box>
+        </Box>
+      </ClientProvider>
+    </ThemeProvider>
   );
 }
 
