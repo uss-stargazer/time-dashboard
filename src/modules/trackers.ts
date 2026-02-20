@@ -5,6 +5,7 @@ type GetBillableHours<ClientData> = (
   from: Date,
   to: Date,
   client: ClientData,
+  signal?: AbortSignal,
 ) => Promise<number>;
 
 export interface Tracker<ClientDataSchema extends ZodBaseClientData> {

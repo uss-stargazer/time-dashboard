@@ -10,13 +10,13 @@ function Card({
     <Box
       {...props}
       sx={{
-        ...props.sx,
         p: "1rem",
         maxWidth: "25em",
         width: fullWidth ? "25em" : undefined,
         border: "1px solid",
         borderColor: "primary.dark",
         borderRadius: "7px",
+        ...props.sx,
       }}
     >
       {children}
