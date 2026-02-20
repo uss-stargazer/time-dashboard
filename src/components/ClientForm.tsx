@@ -19,6 +19,7 @@ import {
   Select,
 } from "@mui/material";
 import { FormNumberField, FormTextField } from "./FormField";
+import Card from "./Card";
 
 function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
   const form = useFormContext<Client>();
@@ -64,7 +65,8 @@ function ClientForm({
 
   return (
     <FormProvider {...form}>
-      <form
+      <Card
+        component="form"
         onSubmit={form.handleSubmit((client: Client) => {
           // This check should really be a validate() option in the FormField, but I can't get it to work
           if (invalidNames.includes(client.name)) {
@@ -72,56 +74,64 @@ function ClientForm({
           } else onSubmit(client);
         })}
       >
-        <FormTextField placeholder="Name" name="name" control={form.control} />
-        <Box sx={{ display: "flex" }}>
-          <FormNumberField
-            placeholder="Rate amount"
-            name="hourlyRate.amount"
-            control={form.control}
-          />
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
           <FormTextField
-            placeholder="Currency"
-            name="hourlyRate.currency"
+            placeholder="Name"
+            name="name"
             control={form.control}
           />
-        </Box>
-        <Controller
-          control={form.control}
-          name="tracker.name"
-          render={({
-            field: { value, onChange, onBlur, ref, name },
-            fieldState: { error },
-          }) => (
-            <FormControl sx={{ minWidth: 120 }} error={error && true}>
-              <InputLabel>Tracker</InputLabel>
-              <Select
-                name={name}
-                label="Tracker"
-                value={value}
-                onChange={(option) => {
-                  onChange(option.target.value);
-                  setTrackerName(option.target.value);
-                }}
-                onBlur={onBlur}
-                inputRef={ref}
-              >
-                {trackerOptions.map((option) => (
-                  <MenuItem key={option.label} value={option.value}>
-                    {option.label}
-                  </MenuItem>
-                ))}
-              </Select>
-              {error && <FormHelperText>{error.message}</FormHelperText>}
-            </FormControl>
-          )}
-        />
+          <Box sx={{ display: "flex" }}>
+            <FormNumberField
+              placeholder="Rate amount"
+              name="hourlyRate.amount"
+              control={form.control}
+            />
+            <FormTextField
+              placeholder="Currency"
+              name="hourlyRate.currency"
+              control={form.control}
+            />
+          </Box>
+          <Controller
+            control={form.control}
+            name="tracker.name"
+            render={({
+              field: { value, onChange, onBlur, ref, name },
+              fieldState: { error },
+            }) => (
+              <FormControl sx={{ minWidth: 120 }} error={error && true}>
+                <InputLabel>Tracker</InputLabel>
+                <Select
+                  name={name}
+                  label="Tracker"
+                  value={value}
+                  onChange={(option) => {
+                    onChange(option.target.value);
+                    setTrackerName(option.target.value);
+                  }}
+                  onBlur={onBlur}
+                  inputRef={ref}
+                >
+                  {trackerOptions.map((option) => (
+                    <MenuItem key={option.label} value={option.value}>
+                      {option.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+                {error && <FormHelperText>{error.message}</FormHelperText>}
+              </FormControl>
+            )}
+          />
 
-        {trackerName && <ClientDataForm trackerName={trackerName} />}
+          {trackerName && <ClientDataForm trackerName={trackerName} />}
+        </Box>
+
+        <br />
 
         <Button type="submit" variant="contained">
           {submitText}
         </Button>
-      </form>
+      </Card>
     </FormProvider>
   );
 }
