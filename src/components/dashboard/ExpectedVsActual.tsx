@@ -8,7 +8,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -16,12 +15,8 @@ import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import useClients from "../../hooks/useClients";
-import trackers, {
-  TrackerError,
-  type TrackerName,
-} from "../../modules/trackers";
-import Card from "../Card";
-import { Error as ErrorIcon } from "@mui/icons-material";
+import trackers, { TrackerError } from "../../modules/trackers";
+import DashboardPane, { useDashboardError } from "./DashboardPane";
 
 const EXPECTED_DAILY_HOURS = 8;
 const WEEKEND_DAYS = [0, 6];
@@ -47,21 +42,19 @@ const getExpectedHours = (start: Dayjs, end: Dayjs): number => {
 };
 
 function ExpectedVsActual() {
-  const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
-  const [startDate, setStartDate] = useState<Dayjs>(() =>
-    dayjs().startOf("month"),
-  );
-
+  const error = useDashboardError();
   const { clients, isLoading: clientsAreLoading } = useClients();
   if (clients.length === 0)
     throw new Error("At least 1 client required for ExpectedVsActual");
   if (clientsAreLoading)
     throw new Error("Loaded clients required for ExpectedVsActual");
 
+  const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
+  const [startDate, setStartDate] = useState<Dayjs>(() =>
+    dayjs().startOf("month"),
+  );
+
   const [actualHours, setActualHours] = useState<number | undefined>(undefined);
-  const [error, setError] = useState<
-    { tracker?: TrackerName; clientName?: String; message: string } | undefined
-  >(undefined);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -90,17 +83,12 @@ function ExpectedVsActual() {
           ),
         ),
       )
-      .catch((error) => {
-        if (error instanceof Error)
-          setError({ ...error, message: error.message });
-        else
-          setError({
-            message: JSON.stringify(error),
-          });
+      .catch((err) => {
+        error.throw(err);
         return undefined;
       })
       .then((clientTotalHours) => {
-        if (clientTotalHours) setError(undefined);
+        if (clientTotalHours) error.reset();
         setActualHours(
           clientTotalHours &&
             clientTotalHours.reduce(
@@ -155,130 +143,87 @@ function ExpectedVsActual() {
     });
   }
 
-  console.log({ error });
-
   return (
-    <Card
-      sx={{
-        borderColor: "primary.main",
-        maxWidth: undefined,
-        display: "flex",
-        flexDirection: "column",
-        gap: 1,
-      }}
-    >
+    <>
       <Box
         sx={{
           display: "flex",
-          flexDirection: {
-            xs: "column",
-            sm: "column",
-            md: "row",
-          },
-          justifyContent: "center",
-          alignItems: "center",
+          flexDirection: "column",
           gap: 1,
         }}
       >
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 1,
-          }}
-        >
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DatePicker
-              label="From"
-              value={startDate}
-              onChange={(value, { validationError }) =>
-                value &&
-                value.isValid() &&
-                !validationError &&
-                setStartDate(value)
-              }
-              maxDate={endDate}
-              disableFuture
-            />
-            <DatePicker
-              label="To"
-              value={endDate}
-              onChange={(value, { validationError }) =>
-                value &&
-                value.isValid() &&
-                !validationError &&
-                setEndDate(value)
-              }
-              minDate={startDate}
-              disableFuture
-            />
-          </LocalizationProvider>
-        </Box>
-
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow sx={{ backgroundColor: "background.paper" }}>
-                <TableCell />
-                <TableCell
-                  variant="head"
-                  align="center"
-                  sx={{ color: "primary.main", width: 10, p: 2 }}
-                >
-                  Actual
-                </TableCell>
-                <TableCell
-                  variant="head"
-                  align="center"
-                  sx={{ color: "primary.main", width: 10, p: 2 }}
-                >
-                  Expected
-                </TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {rows.map((row) => (
-                <TableRow
-                  key={row.name}
-                  sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-                >
-                  <TableCell component="th" scope="row" align="right">
-                    {row.name}
-                  </TableCell>
-                  {/* TODO: currency symbol */}
-                  <TableCell align="center" color="primary.main">
-                    {row.actual !== undefined ? (
-                      (Math.round(row.actual * 100) / 100).toLocaleString()
-                    ) : (
-                      <Button loading />
-                    )}
-                  </TableCell>
-                  <TableCell align="center" color="primary.main">
-                    {(Math.round(row.expected * 100) / 100).toLocaleString()}
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DatePicker
+            label="From"
+            value={startDate}
+            onChange={(value, { validationError }) =>
+              value &&
+              value.isValid() &&
+              !validationError &&
+              setStartDate(value)
+            }
+            maxDate={endDate}
+            disableFuture
+          />
+          <DatePicker
+            label="To"
+            value={endDate}
+            onChange={(value, { validationError }) =>
+              value && value.isValid() && !validationError && setEndDate(value)
+            }
+            minDate={startDate}
+            disableFuture
+          />
+        </LocalizationProvider>
       </Box>
 
-      {error && (
-        <Card sx={{ maxWidth: undefined, borderColor: "error.main" }}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <ErrorIcon color="error" fontSize="small" />
-            <Typography color="error.main" variant="caption">
-              {error.tracker
-                ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ""}`
-                : "Some error"}
-            </Typography>
-          </Box>
-          <Typography variant="caption" m={1}>
-            {error.message}
-          </Typography>
-        </Card>
-      )}
-    </Card>
+      <TableContainer component={Paper}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: "background.paper" }}>
+              <TableCell />
+              <TableCell
+                variant="head"
+                align="center"
+                sx={{ color: "primary.main", width: 10, p: 2 }}
+              >
+                Actual
+              </TableCell>
+              <TableCell
+                variant="head"
+                align="center"
+                sx={{ color: "primary.main", width: 10, p: 2 }}
+              >
+                Expected
+              </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {rows.map((row) => (
+              <TableRow
+                key={row.name}
+                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+              >
+                <TableCell component="th" scope="row" align="right">
+                  {row.name}
+                </TableCell>
+                {/* TODO: currency symbol */}
+                <TableCell align="center" color="primary.main">
+                  {row.actual !== undefined ? (
+                    (Math.round(row.actual * 100) / 100).toLocaleString()
+                  ) : (
+                    <Button loading />
+                  )}
+                </TableCell>
+                <TableCell align="center" color="primary.main">
+                  {(Math.round(row.expected * 100) / 100).toLocaleString()}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }
 
