@@ -8,7 +8,7 @@ const getExpectedHours = (from: Date, to: Date): number => {
   );
   const nWeeks = Math.floor(daysBetween / 7);
   const weekOffset = daysBetween % 7;
-  const nWeekDays = nWeeks * 5; // + SOMETHING
+  const nWeekDays = nWeeks * 5;
   return nWeekDays * EXPECTED_DAILY_HOURS;
 };
 
@@ -22,19 +22,7 @@ function ExpectedVsActual() {
 
   const expectedHours = getExpectedHours(startDate, endDate);
 
-  return (
-    <>
-      <div>
-        <input type="date" onChange={} />
-      </div>
-      <div>
-        <div> Expected | Actual</div>
-        <div>
-          Hours | {} | {}
-        </div>
-      </div>
-    </>
-  );
+  return <></>;
 }
 
 export default ExpectedVsActual;
