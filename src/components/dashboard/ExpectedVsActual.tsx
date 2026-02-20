@@ -17,6 +17,7 @@ import { useEffect, useState } from "react";
 import useClients from "../../hooks/useClients";
 import trackers, { TrackerError } from "../../modules/trackers";
 import DashboardPane, { useDashboardError } from "./DashboardPane";
+import { formatMoney } from "../../modules/util";
 
 const EXPECTED_DAILY_HOURS = 8;
 const WEEKEND_DAYS = [0, 6];
@@ -211,13 +212,13 @@ function ExpectedVsActual() {
                 {/* TODO: currency symbol */}
                 <TableCell align="center" color="primary.main">
                   {row.actual !== undefined ? (
-                    (Math.round(row.actual * 100) / 100).toLocaleString()
+                    formatMoney(row.actual)
                   ) : (
                     <Button loading />
                   )}
                 </TableCell>
                 <TableCell align="center" color="primary.main">
-                  {(Math.round(row.expected * 100) / 100).toLocaleString()}
+                  {formatMoney(row.expected)}
                 </TableCell>
               </TableRow>
             ))}

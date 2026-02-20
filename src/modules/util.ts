@@ -10,3 +10,9 @@ export const camelCaseToTitle = (cc: string) =>
       (idx === 0 ? c.toUpperCase() : c),
     "",
   );
+
+export const formatMoney = (amount: number): string =>
+  amount.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
