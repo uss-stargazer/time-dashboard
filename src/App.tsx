@@ -6,6 +6,7 @@ import {
   Box,
   Button,
   createTheme,
+  IconButton,
   ThemeProvider,
   Toolbar,
   Typography,
@@ -13,7 +14,7 @@ import {
 import ClientForm from "./components/ClientForm";
 import useClients, { ClientProvider } from "./hooks/useClients";
 import type { Client } from "./modules/clients";
-import { useState } from "react";
+import { useRef, useState, type Ref } from "react";
 import { Add, Dashboard, ExpandMore, Settings } from "@mui/icons-material";
 import Card from "./components/Card";
 
@@ -106,14 +107,32 @@ const theme = createTheme({
 });
 
 function App() {
+  const editClientsRef = useRef<HTMLDivElement | null>(null);
+  const [editClientsExpanded, setEditClientsExpanded] =
+    useState<boolean>(false);
+  const scrollToEditClients = () => {
+    if (editClientsRef.current) {
+      setEditClientsExpanded(true);
+      editClientsRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <ClientProvider>
         <Box sx={{ display: "flex", flexDirection: "column" }}>
           <Box>
             <AppBar position="static">
-              <Toolbar>
+              <Toolbar
+                sx={{ display: "flex", justifyContent: "space-between" }}
+              >
                 <Typography color="primary">Time Dashboard</Typography>
+                <IconButton onClick={scrollToEditClients}>
+                  <Settings />
+                </IconButton>
               </Toolbar>
             </AppBar>
           </Box>
@@ -129,7 +148,11 @@ function App() {
           >
             <Dashboard />
 
-            <Accordion>
+            <Accordion
+              ref={editClientsRef}
+              expanded={editClientsExpanded}
+              onChange={(_, expanded) => setEditClientsExpanded(expanded)}
+            >
               <AccordionSummary expandIcon={<ExpandMore />}>
                 <Box display="flex" gap="1rem">
                   <Settings />
