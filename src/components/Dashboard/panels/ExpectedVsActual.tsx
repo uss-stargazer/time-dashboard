@@ -15,7 +15,6 @@ import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import trackers, { TrackerError } from "../../../modules/trackers";
-import { formatMoney } from "../../../modules/util";
 import type { DashboardPanelProps } from "../modules/definitions";
 
 const EXPECTED_DAILY_HOURS = 8;
@@ -41,9 +40,9 @@ const getExpectedHours = (start: Dayjs, end: Dayjs): number => {
   return nWeekDays * EXPECTED_DAILY_HOURS;
 };
 
-type Row = { name: string; expected: number; actual?: number };
+type Row = { name: string; expected: string; actual?: string };
 
-function ExpectedVsActual({ data, error }: DashboardPanelProps) {
+function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
   const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
   const [startDate, setStartDate] = useState<Dayjs>(() =>
     dayjs().startOf("month"),
@@ -104,15 +103,18 @@ function ExpectedVsActual({ data, error }: DashboardPanelProps) {
   const rows: Row[] = [
     {
       name: "Hours",
-      expected: expectedHours,
-      actual: actualHours,
+      expected: expectedHours.toFixed(2),
+      actual: actualHours?.toFixed(2),
     },
     ...Object.entries(
       typeof data.rate === "number" ? { single: data.rate } : data.rate,
     ).map(([stat, rate]) => ({
       name: `Income (${stat})`,
-      expected: expectedHours * rate,
-      actual: actualHours !== undefined ? actualHours * rate : undefined,
+      expected: money.format(expectedHours * rate),
+      actual:
+        actualHours !== undefined
+          ? money.format(actualHours * rate)
+          : undefined,
     })),
   ];
 
@@ -180,16 +182,11 @@ function ExpectedVsActual({ data, error }: DashboardPanelProps) {
                 <TableCell component="th" scope="row" align="right">
                   {row.name}
                 </TableCell>
-                {/* TODO: currency symbol */}
                 <TableCell align="center" color="primary.main">
-                  {row.actual !== undefined ? (
-                    formatMoney(row.actual)
-                  ) : (
-                    <Button loading />
-                  )}
+                  {row.actual !== undefined ? row.actual : <Button loading />}
                 </TableCell>
                 <TableCell align="center" color="primary.main">
-                  {formatMoney(row.expected)}
+                  {row.expected}
                 </TableCell>
               </TableRow>
             ))}
