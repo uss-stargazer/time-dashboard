@@ -108,12 +108,10 @@ function ClientEditor({
   isOpen,
   setIsOpen,
   ref,
-  container,
 }: {
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
-  ref: Ref<HTMLDivElement>;
-  container: () => Element | null;
+  ref?: Ref<HTMLDivElement>;
 }) {
   return (
     <>
@@ -127,7 +125,6 @@ function ClientEditor({
       />
       <Box onClick={() => isOpen || setIsOpen(true)}>
         <SwipeableDrawer
-          container={container}
           anchor="bottom"
           open={isOpen}
           onClose={() => setIsOpen(false)}

@@ -99,15 +99,17 @@ function Monthly() {
       ) : (
         <BarChart
           height={300}
+          width={100 + 150 * clients.length}
           dataset={clientData}
           xAxis={[{ dataKey: "clientName" }]}
           yAxis={[
-            { id: "hoursAxis", dataKey: "hours", width: 50 },
+            { id: "hoursAxis", dataKey: "hours", label: "Hours", width: 50 },
             {
               id: "incomeAxis",
               dataKey: "income",
               width: 50,
               position: "right",
+              label: "Money", // TODO: currency
             },
           ]}
           series={[
