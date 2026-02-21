@@ -16,6 +16,7 @@ function Card({
         border: "1px solid",
         borderColor: "primary.dark",
         borderRadius: "7px",
+        bgcolor: "grey.900",
         ...props.sx,
       }}
     >
