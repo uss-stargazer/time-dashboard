@@ -24,6 +24,7 @@
     "@mui/x-charts": "^8.27.0",
     "@mui/x-date-pickers": "^8.27.0",
     "dayjs": "^1.11.19",
+    "easy-currencies": "^1.8.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "react-error-boundary": "^6.1.1",
