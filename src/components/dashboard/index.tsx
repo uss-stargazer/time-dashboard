@@ -146,6 +146,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           flexWrap: "wrap",
           alignItems: "flex-start",
           gap: 3,
+          justifyContent: { xs: "center", sm: "center", md: "flex-start" },
         }}
       >
         {dashboardPanelComponents.map((Panel) => (
