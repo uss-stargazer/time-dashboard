@@ -4,8 +4,9 @@ import type { PropsWithChildren } from "react";
 function Card({
   children,
   fullWidth,
+  faded,
   ...props
-}: PropsWithChildren<BoxProps & { fullWidth?: boolean }>) {
+}: PropsWithChildren<BoxProps & { fullWidth?: boolean; faded?: boolean }>) {
   return (
     <Box
       {...props}
@@ -16,7 +17,7 @@ function Card({
         border: "1px solid",
         borderColor: "primary.dark",
         borderRadius: "7px",
-        bgcolor: "grey.900",
+        bgcolor: faded ? "background.main" : "grey.900",
         ...props.sx,
       }}
     >

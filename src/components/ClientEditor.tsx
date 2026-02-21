@@ -59,8 +59,17 @@ function Editor() {
             invalidNames={clientNames.filter((c) => c !== client.name)}
             submitText="Update"
             onSubmit={(updated) => updateClient(client.name, updated)}
+            isHidden={client.isHidden}
             otherButtons={[
               { label: "Remove", onClick: () => removeClient(client.name) },
+              {
+                label: client.isHidden ? "Unhide" : "Hide",
+                onClick: () =>
+                  updateClient(client.name, {
+                    ...client,
+                    isHidden: !client.isHidden,
+                  }),
+              },
             ]}
           />
         )),

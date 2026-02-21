@@ -11,5 +11,6 @@ export const ClientSchema = z.object({
     currency: z.string().length(3),
   }),
   tracker: TrackerClientDataSchema,
+  isHidden: z.boolean().optional(),
 });
 export type Client = z.infer<typeof ClientSchema>;
