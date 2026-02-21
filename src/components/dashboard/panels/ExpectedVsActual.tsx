@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   Paper,
+  Radio,
   Table,
   TableBody,
   TableCell,
@@ -48,11 +49,13 @@ function DateInput({
   value,
   onChange,
   validate,
+  presets,
 }: {
   label: string;
   value: Dayjs;
   onChange: (newDate: Dayjs) => void;
   validate: (newDate: Dayjs) => void | string;
+  presets?: { label: string; onClick: () => void }[];
 }) {
   const [error, setError] = useState<string | null>(null);
   return (
@@ -76,6 +79,21 @@ function DateInput({
         <Typography variant="caption" color="error">
           {error}
         </Typography>
+      )}
+      {presets && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          {presets.map((preset) => (
+            <Box>
+              <Radio
+                size="small"
+                checked={false}
+                onClick={preset.onClick}
+                sx={{ p: 0.5 }}
+              />
+              <Typography variant="caption">{preset.label}</Typography>
+            </Box>
+          ))}
+        </Box>
       )}
     </Box>
   );
@@ -175,6 +193,16 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
               if (startDate.isAfter(endDate))
                 return "Start must be before end!";
             }}
+            presets={[
+              {
+                label: "month",
+                onClick: () => setStartDate(endDate.startOf("month")),
+              },
+              {
+                label: "year",
+                onClick: () => setStartDate(endDate.startOf("year")),
+              },
+            ]}
           />
           <DateInput
             label="To"
@@ -184,6 +212,7 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
               if (startDate.isAfter(endDate))
                 return "Start must be before end!";
             }}
+            presets={[{ label: "today", onClick: () => setEndDate(dayjs()) }]}
           />
         </LocalizationProvider>
       </Box>
