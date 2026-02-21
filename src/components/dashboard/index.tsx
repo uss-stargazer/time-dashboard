@@ -95,7 +95,8 @@ const dashboardPanelComponents: React.FC<DashboardPanelProps>[] = [
 ];
 
 function Dashboard({ sx }: { sx?: SxProps }) {
-  const { clients, isLoading } = useClients();
+  const { clients: allClients, isLoading } = useClients();
+  const clients = allClients.filter((client) => !client.isHidden);
 
   if (isLoading || clients.length === 0)
     return (
@@ -117,7 +118,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           <>
             <Info />
             <Typography textAlign="center">
-              Add a client to view your time dashboard.
+              Add a non-hidden client to view your time dashboard.
             </Typography>
           </>
         )}

@@ -3,17 +3,15 @@ import {
   Box,
   Button,
   GlobalStyles,
-  IconButton,
   styled,
   SwipeableDrawer,
-  Toolbar,
   Typography,
 } from "@mui/material";
 import useClients from "../hooks/useClients";
 import { useState, type Ref } from "react";
 import type { Client } from "../modules/clients";
 import ClientForm from "./ClientForm";
-import { Add, Password, Settings } from "@mui/icons-material";
+import { Add, Settings } from "@mui/icons-material";
 import Card from "./Card";
 import { grey } from "@mui/material/colors";
 
@@ -61,8 +59,17 @@ function Editor() {
             invalidNames={clientNames.filter((c) => c !== client.name)}
             submitText="Update"
             onSubmit={(updated) => updateClient(client.name, updated)}
+            isHidden={client.isHidden}
             otherButtons={[
               { label: "Remove", onClick: () => removeClient(client.name) },
+              {
+                label: client.isHidden ? "Unhide" : "Hide",
+                onClick: () =>
+                  updateClient(client.name, {
+                    ...client,
+                    isHidden: !client.isHidden,
+                  }),
+              },
             ]}
           />
         )),

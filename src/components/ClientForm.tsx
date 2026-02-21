@@ -45,12 +45,14 @@ function ClientForm({
   submitText = "Submit",
   onSubmit,
   otherButtons,
+  isHidden,
 }: {
   client: Partial<Client>;
   invalidNames: string[];
   submitText?: string;
   onSubmit: (updated: Client) => void;
   otherButtons?: { label: string; onClick: () => void }[];
+  isHidden?: boolean;
 }) {
   const form = useForm<Client>({
     resolver: zodResolver(ClientSchema),
@@ -69,6 +71,7 @@ function ClientForm({
     <FormProvider {...form}>
       <Card
         component="form"
+        faded={isHidden}
         onSubmit={form.handleSubmit((client: Client) => {
           // This check should really be a validate() option in the FormField, but I can't get it to work
           if (invalidNames.includes(client.name)) {
