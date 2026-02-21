@@ -5,12 +5,11 @@ import { useEffect, useState } from "react";
 import trackers, { TrackerError } from "../../../modules/trackers";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
-import { formatMoney } from "../../../modules/util";
 import type { DashboardPanelProps } from "../modules/definitions";
 
 type ClientDataGroup = { clientName: string; hours: number; income: number };
 
-function Monthly({ data, error }: DashboardPanelProps) {
+function Monthly({ data, error, money }: DashboardPanelProps) {
   const theme = useTheme();
   const [month, setMonth] = useState<Dayjs>(() => dayjs().startOf("month"));
   const [clientData, setClientData] = useState<ClientDataGroup[] | undefined>(
@@ -46,7 +45,7 @@ function Monthly({ data, error }: DashboardPanelProps) {
           return {
             clientName: client.name,
             hours,
-            income: client.hourlyRate.amount * hours, // TODO: Currency conversion
+            income: client.hourlyRate * hours,
           };
         })(),
       ),
@@ -124,7 +123,7 @@ function Monthly({ data, error }: DashboardPanelProps) {
               id: "incomeAxis",
               dataKey: "income",
               position: "bottom",
-              label: "Money", // TODO: currency
+              label: `Money (${money.currency})`,
             },
           ]}
           series={[
@@ -138,7 +137,7 @@ function Monthly({ data, error }: DashboardPanelProps) {
             {
               dataKey: "income",
               label: "Income",
-              valueFormatter: (v) => (v === null ? null : `${formatMoney(v)}`), // TODO: Currency symbol
+              valueFormatter: (v) => (v === null ? null : money.format(v)),
               color: theme.palette.success.main,
               xAxisId: "incomeAxis",
             },

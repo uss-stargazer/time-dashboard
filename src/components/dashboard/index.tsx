@@ -1,6 +1,10 @@
 import {
   Box,
   Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Typography,
   type BoxProps,
   type SxProps,
@@ -9,22 +13,28 @@ import ExpectedVsActual from "./panels/ExpectedVsActual";
 import useClients from "../../hooks/useClients";
 import { Error as ErrorIcon, Info } from "@mui/icons-material";
 import Monthly from "./panels/Monthly";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import type {
   DashboardData,
   DashboardErrorType,
   DashboardPanelProps,
+  ParsedClient,
 } from "./modules/definitions";
 import trackers from "../../modules/trackers";
-import type { Client } from "../../modules/clients";
 import Card from "../Card";
+import { Convert } from "easy-currencies";
+import { currencies, type Currency } from "../../modules/currencies";
 
 function DashboardPanel({
   data,
+  universalCurrency,
+  moneyFormatter,
   Panel,
   ...props
 }: Omit<BoxProps, "children"> & {
   data: DashboardData;
+  universalCurrency: Currency;
+  moneyFormatter: Intl.NumberFormat;
   Panel: React.FC<DashboardPanelProps>;
 }) {
   const [error, setError] = useState<DashboardErrorType | undefined>(undefined);
@@ -56,6 +66,7 @@ function DashboardPanel({
       >
         <Panel
           data={data}
+          money={{ currency: universalCurrency, format: moneyFormatter.format }}
           error={{
             throw: (error) =>
               setError(
@@ -96,7 +107,26 @@ const dashboardPanelComponents: React.FC<DashboardPanelProps>[] = [
 
 function Dashboard({ sx }: { sx?: SxProps }) {
   const { clients: allClients, isLoading } = useClients();
-  const clients = allClients.filter((client) => !client.isHidden);
+  const [dashboardCurrency, setDashboardCurrency] = useState<Currency>("USD");
+  const [clients, setClients] = useState<ParsedClient[]>([]);
+
+  useEffect(() => {
+    Promise.all(
+      allClients
+        .filter((c) => !c.isHidden)
+        .map((c) =>
+          (async () => ({
+            ...c,
+            hourlyRate:
+              c.hourlyRate.currency === dashboardCurrency
+                ? c.hourlyRate.amount
+                : await Convert(c.hourlyRate.amount)
+                    .from(c.hourlyRate.currency)
+                    .to(dashboardCurrency),
+          }))(),
+        ),
+    ).then((parsedClients) => setClients(parsedClients));
+  }, [allClients, dashboardCurrency]);
 
   if (isLoading || clients.length === 0)
     return (
@@ -126,11 +156,11 @@ function Dashboard({ sx }: { sx?: SxProps }) {
     );
 
   const data: DashboardData = {
-    clients: clients as [Client, ...Client[]], // clients.length must be greater than zero
-    rate: clients[0].hourlyRate.amount,
+    clients: clients as [ParsedClient, ...ParsedClient[]], // clients.length must be greater than zero
+    rate: clients[0].hourlyRate,
   };
   if (clients.length > 1) {
-    const rates = clients.map((c) => c.hourlyRate.amount);
+    const rates = clients.map((c) => c.hourlyRate);
     data.rate = {
       avg: rates.reduce((sum, v) => sum + v, 0) / rates.length,
       min: Math.min(...rates),
@@ -138,8 +168,32 @@ function Dashboard({ sx }: { sx?: SxProps }) {
     };
   }
 
+  const moneyFormatter = new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency: dashboardCurrency,
+  });
+
   return (
-    <Box sx={sx}>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        g: 1,
+        ...sx,
+      }}
+    >
+      <FormControl>
+        <InputLabel>Dashboard Currency</InputLabel>
+        <Select
+          value={dashboardCurrency}
+          onChange={(event) => setDashboardCurrency(event.target.value)}
+        >
+          {currencies.map((currency) => (
+            <MenuItem value={currency}>{currency}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+
       <Box
         sx={{
           display: "flex",
@@ -150,7 +204,12 @@ function Dashboard({ sx }: { sx?: SxProps }) {
         }}
       >
         {dashboardPanelComponents.map((Panel) => (
-          <DashboardPanel Panel={Panel} data={data} />
+          <DashboardPanel
+            Panel={Panel}
+            data={data}
+            moneyFormatter={moneyFormatter}
+            universalCurrency={dashboardCurrency}
+          />
         ))}
       </Box>
     </Box>
