@@ -2,5 +2,4 @@
 - Strict selection of currencies
 - Prompt user for normalized currency in dashboard
   - Normalization functions, etc
-- Option to hide clients from dashboard
 - Cool splash screen

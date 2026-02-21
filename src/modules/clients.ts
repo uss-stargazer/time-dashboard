@@ -1,5 +1,5 @@
 import z from "zod";
-import trackers, { TrackerClientDataSchema, trackerNames } from "./trackers";
+import { TrackerClientDataSchema } from "./trackers";
 
 export const BaseClientDataSchema = z.record(z.string(), z.string());
 export type ZodBaseClientData = z.ZodType<Record<string, string>>;
@@ -11,5 +11,6 @@ export const ClientSchema = z.object({
     currency: z.string().length(3),
   }),
   tracker: TrackerClientDataSchema,
+  isHidden: z.boolean().optional(),
 });
 export type Client = z.infer<typeof ClientSchema>;
