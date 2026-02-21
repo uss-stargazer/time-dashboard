@@ -32,8 +32,8 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
         (async (): Promise<ClientDataGroup> => {
           const hours = await trackers[client.tracker.name]
             .getBillableHours(
-              month.toDate(),
-              monthEnd.toDate(),
+              month,
+              monthEnd,
               // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
               client.tracker.data,
               controller.signal,

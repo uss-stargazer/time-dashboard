@@ -1,10 +1,11 @@
 import z from "zod";
 import type { ZodBaseClientData } from "../clients";
 import { sample1, sample2 } from "./samples";
+import type { Dayjs } from "dayjs";
 
 type GetBillableHours<ClientData> = (
-  from: Date,
-  to: Date,
+  from: Dayjs,
+  to: Dayjs,
   client: ClientData,
   signal?: AbortSignal,
 ) => Promise<number>;

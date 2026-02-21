@@ -120,8 +120,8 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
           data.clients.map((client) =>
             trackers[client.tracker.name]
               .getBillableHours(
-                startDate.toDate(),
-                endDate.toDate(),
+                startDate,
+                endDate,
                 // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
                 client.tracker.data,
                 controller.signal,
