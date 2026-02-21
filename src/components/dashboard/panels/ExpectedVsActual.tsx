@@ -8,6 +8,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  Typography,
 } from "@mui/material";
 import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -41,6 +42,44 @@ const getExpectedHours = (start: Dayjs, end: Dayjs): number => {
 };
 
 type Row = { name: string; expected: string; actual?: string };
+
+function DateInput({
+  label,
+  value,
+  onChange,
+  validate,
+}: {
+  label: string;
+  value: Dayjs;
+  onChange: (newDate: Dayjs) => void;
+  validate: (newDate: Dayjs) => void | string;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  return (
+    <Box>
+      <DatePicker
+        label={label}
+        value={value}
+        onChange={(value, { validationError }) => {
+          if (value && value.isValid() && !validationError) {
+            const error = validate(value);
+            if (typeof error === "string") setError(error);
+            else {
+              setError(null);
+              onChange(value);
+            }
+          }
+        }}
+        disableFuture
+      />
+      {error && (
+        <Typography variant="caption" color="error">
+          {error}
+        </Typography>
+      )}
+    </Box>
+  );
+}
 
 function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
   const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
@@ -128,26 +167,23 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
         }}
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
+          <DateInput
             label="From"
             value={startDate}
-            onChange={(value, { validationError }) =>
-              value &&
-              value.isValid() &&
-              !validationError &&
-              setStartDate(value)
-            }
-            maxDate={endDate}
-            disableFuture
+            onChange={setStartDate}
+            validate={(startDate) => {
+              if (startDate.isAfter(endDate))
+                return "Start must be before end!";
+            }}
           />
-          <DatePicker
+          <DateInput
             label="To"
             value={endDate}
-            onChange={(value, { validationError }) =>
-              value && value.isValid() && !validationError && setEndDate(value)
-            }
-            minDate={startDate}
-            disableFuture
+            onChange={setEndDate}
+            validate={(endDate) => {
+              if (startDate.isAfter(endDate))
+                return "Start must be before end!";
+            }}
           />
         </LocalizationProvider>
       </Box>
