@@ -70,25 +70,22 @@ function App() {
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <ThemeProvider theme={theme}>
-        <Box sx={{ display: "flex", flexDirection: "column" }}>
-          <ClientProvider>
-            <Box
-              sx={{
-                flexGrow: 1,
-                p: "1rem",
-                display: "flex",
-                flexDirection: "column",
-                gap: "1rem",
-              }}
-            >
-              <Dashboard />
-              <ClientEditor
-                isOpen={editClientsOpen}
-                setIsOpen={setEditClientsOpen}
-              />
-            </Box>
-          </ClientProvider>
-        </Box>
+        <ClientProvider>
+          <Box
+            sx={{
+              minHeight: "100vh",
+              width: "100vw",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
+            <Dashboard sx={{ flexGrow: 1, p: 2 }} />
+            <ClientEditor
+              isOpen={editClientsOpen}
+              setIsOpen={setEditClientsOpen}
+            />
+          </Box>
+        </ClientProvider>
       </ThemeProvider>
     </ErrorBoundary>
   );
