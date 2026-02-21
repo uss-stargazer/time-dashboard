@@ -54,15 +54,26 @@ function Monthly({ data, error }: DashboardPanelProps) {
       .catch((err) => {
         controller.abort();
         error.throw(err);
-        return undefined;
+        throw err;
       })
-      .then((clientDataGroups) => setClientData(clientDataGroups));
+      .then((clientDataGroups) => {
+        error.reset();
+        setClientData(clientDataGroups);
+      });
 
     return () => controller.abort();
   }, [data.clients, month]);
 
   return (
-    <>
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: 2,
+      }}
+    >
       <Box
         sx={{
           display: "flex",
@@ -91,17 +102,31 @@ function Monthly({ data, error }: DashboardPanelProps) {
         <Button loading />
       ) : (
         <BarChart
-          height={300}
-          width={100 + 150 * data.clients.length}
+          width={300}
+          height={100 + 150 * data.clients.length}
+          sx={{ bgcolor: "background.paper" }}
+          layout="horizontal"
           dataset={clientData}
-          xAxis={[{ dataKey: "clientName" }]}
           yAxis={[
-            { id: "hoursAxis", dataKey: "hours", label: "Hours", width: 50 },
+            {
+              dataKey: "clientName",
+              tickLabelStyle: {
+                angle: -90,
+                textAnchor: "middle",
+              },
+            },
+          ]}
+          xAxis={[
+            {
+              id: "hoursAxis",
+              dataKey: "hours",
+              position: "top",
+              label: "Hours",
+            },
             {
               id: "incomeAxis",
               dataKey: "income",
-              width: 50,
-              position: "right",
+              position: "bottom",
               label: "Money", // TODO: currency
             },
           ]}
@@ -111,19 +136,19 @@ function Monthly({ data, error }: DashboardPanelProps) {
               label: "Hours",
               valueFormatter: (v) => (v === null ? null : `${v?.toFixed(2)}h`),
               color: theme.palette.primary.main,
-              yAxisId: "hoursAxis",
+              xAxisId: "hoursAxis",
             },
             {
               dataKey: "income",
               label: "Income",
               valueFormatter: (v) => (v === null ? null : `${formatMoney(v)}`), // TODO: Currency symbol
               color: theme.palette.success.main,
-              yAxisId: "incomeAxis",
+              xAxisId: "incomeAxis",
             },
           ]}
         />
       )}
-    </>
+    </Box>
   );
 }
 
