@@ -1,5 +1,6 @@
 import z from "zod";
-import type { ZodBaseClientData } from "./clients";
+import type { ZodBaseClientData } from "../clients";
+import { sample1, sample2 } from "./samples";
 
 type GetBillableHours<ClientData> = (
   from: Date,
@@ -29,22 +30,17 @@ export const makeTracker = <ClientDataSchema extends ZodBaseClientData>(
 ): Tracker<ClientDataSchema> => tracker;
 
 const trackers = {
-  sample1: makeTracker({
-    prettyName: "Sample Tracker 1",
-    clientDataSchema: z.object({ apiToken: z.string() }),
-    getBillableHours: async (to, from, client) => {
-      if (client.apiToken.length !== 5)
-        throw new TrackerError("sample1", "invalid apiToken");
-      return (from.getSeconds() - to.getSeconds()) / 3600;
-    },
-  }),
-  sample2: makeTracker({
-    prettyName: "Sample Tracker 2",
-    clientDataSchema: z.object({ uuid: z.uuid(), id: z.string().length(3) }),
-    getBillableHours: async (to, from, client) =>
-      ((from.getSeconds() - to.getSeconds()) / 3600) * client.id.length,
-  }),
+  sample1,
+  sample2,
 } as const satisfies { [key: string]: Tracker<ZodBaseClientData> };
+
+// Remove sample trackers if not dev
+if (!import.meta.env.DEV) {
+  // @ts-expect-error
+  delete trackers.sample1;
+  // @ts-expect-error
+  delete trackers.sample2;
+}
 
 export type Trackers = typeof trackers;
 export type TrackerName = keyof Trackers;
