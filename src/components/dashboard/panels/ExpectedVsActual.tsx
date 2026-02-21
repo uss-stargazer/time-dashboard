@@ -14,10 +14,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import useClients from "../../hooks/useClients";
-import trackers, { TrackerError } from "../../modules/trackers";
-import DashboardPane, { useDashboardError } from "./DashboardPane";
-import { formatMoney } from "../../modules/util";
+import trackers, { TrackerError } from "../../../modules/trackers";
+import { formatMoney } from "../../../modules/util";
+import type { DashboardPanelProps } from "../modules/definitions";
 
 const EXPECTED_DAILY_HOURS = 8;
 const WEEKEND_DAYS = [0, 6];
@@ -42,14 +41,9 @@ const getExpectedHours = (start: Dayjs, end: Dayjs): number => {
   return nWeekDays * EXPECTED_DAILY_HOURS;
 };
 
-function ExpectedVsActual() {
-  const error = useDashboardError();
-  const { clients, isLoading: clientsAreLoading } = useClients();
-  if (clients.length === 0)
-    throw new Error("At least 1 client required for ExpectedVsActual");
-  if (clientsAreLoading)
-    throw new Error("Loaded clients required for ExpectedVsActual");
+type Row = { name: string; expected: number; actual?: number };
 
+function ExpectedVsActual({ data, error }: DashboardPanelProps) {
   const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
   const [startDate, setStartDate] = useState<Dayjs>(() =>
     dayjs().startOf("month"),
@@ -67,7 +61,7 @@ function ExpectedVsActual() {
     })
       .then(() =>
         Promise.all(
-          clients.map((client) =>
+          data.clients.map((client) =>
             trackers[client.tracker.name]
               .getBillableHours(
                 startDate.toDate(),
@@ -104,46 +98,23 @@ function ExpectedVsActual() {
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [clients, startDate, endDate]);
-
-  if (clientsAreLoading) return <Button loading />;
+  }, [data.clients, startDate, endDate]);
 
   const expectedHours = getExpectedHours(startDate, endDate);
-
-  // Compute table rows
-
-  const rows: { name: string; expected: number; actual?: number }[] = [
+  const rows: Row[] = [
     {
       name: "Hours",
       expected: expectedHours,
       actual: actualHours,
     },
+    ...Object.entries(
+      typeof data.rate === "number" ? { single: data.rate } : data.rate,
+    ).map(([stat, rate]) => ({
+      name: `Income (${stat})`,
+      expected: expectedHours * rate,
+      actual: actualHours !== undefined ? actualHours * rate : undefined,
+    })),
   ];
-  if (clients.length > 1) {
-    // TODO: This doesn't take into account currencty 😭; prob should prompt user for currency and convert all before
-    const rates = clients.map((c) => c.hourlyRate.amount);
-    const rateStats = {
-      avg: rates.reduce((sum, v) => sum + v, 0) / rates.length,
-      min: Math.min(...rates),
-      max: Math.max(...rates),
-    };
-    Object.entries(rateStats).forEach(([stat, rate]) =>
-      rows.push({
-        name: `Income (${stat})`,
-        expected: expectedHours * rate,
-        actual: actualHours !== undefined ? actualHours * rate : undefined,
-      }),
-    );
-  } else {
-    rows.push({
-      name: "Income",
-      expected: expectedHours * clients[0].hourlyRate.amount,
-      actual:
-        actualHours !== undefined
-          ? actualHours * clients[0].hourlyRate.amount
-          : undefined,
-    });
-  }
 
   return (
     <>
