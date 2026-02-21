@@ -178,21 +178,24 @@ function Dashboard({ sx }: { sx?: SxProps }) {
       sx={{
         display: "flex",
         flexDirection: "column",
-        g: 1,
+        gap: 1,
         ...sx,
       }}
     >
-      <FormControl>
-        <InputLabel>Dashboard Currency</InputLabel>
-        <Select
-          value={dashboardCurrency}
-          onChange={(event) => setDashboardCurrency(event.target.value)}
-        >
-          {currencies.map((currency) => (
-            <MenuItem value={currency}>{currency}</MenuItem>
-          ))}
-        </Select>
-      </FormControl>
+      <Box sx={{ display: "flex", justifyContent: "left " }}>
+        <FormControl>
+          <InputLabel>Currency</InputLabel>
+          <Select
+            value={dashboardCurrency}
+            onChange={(event) => setDashboardCurrency(event.target.value)}
+            sx={{ minWidth: 100 }}
+          >
+            {currencies.map((currency) => (
+              <MenuItem value={currency}>{currency}</MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
 
       <Box
         sx={{

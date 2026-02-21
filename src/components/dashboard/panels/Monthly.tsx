@@ -99,7 +99,7 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
       ) : (
         <BarChart
           width={300}
-          height={100 + 150 * data.clients.length}
+          height={100 + 120 * data.clients.length}
           sx={{ bgcolor: "background.paper" }}
           layout="horizontal"
           dataset={clientData}
