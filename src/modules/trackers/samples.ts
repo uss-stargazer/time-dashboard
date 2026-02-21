@@ -7,7 +7,7 @@ export const sample1 = makeTracker({
   getBillableHours: async (to, from, client) => {
     if (client.apiToken.length !== 5)
       throw new TrackerError("sample1", "invalid apiToken");
-    return (from.getSeconds() - to.getSeconds()) / 3600;
+    return from.diff(to, "days") / 3600;
   },
 });
 
@@ -15,5 +15,5 @@ export const sample2 = makeTracker({
   prettyName: "Sample Tracker 2",
   clientDataSchema: z.object({ uuid: z.uuid(), id: z.string().length(3) }),
   getBillableHours: async (to, from, client) =>
-    ((from.getSeconds() - to.getSeconds()) / 3600) * client.id.length,
+    (from.diff(to, "days") / 3600) * client.id.length,
 });
