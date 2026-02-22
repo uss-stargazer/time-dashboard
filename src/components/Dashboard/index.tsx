@@ -24,6 +24,7 @@ import trackers from "../../modules/trackers";
 import Card from "../Card";
 import { Convert } from "easy-currencies";
 import { currencies, type Currency } from "../../modules/currencies";
+import useAsyncError from "../../hooks/useAsyncError";
 
 function DashboardPanel({
   data,
@@ -106,6 +107,7 @@ const dashboardPanelComponents: React.FC<DashboardPanelProps>[] = [
 ];
 
 function Dashboard({ sx }: { sx?: SxProps }) {
+  const throwError = useAsyncError();
   const { clients: allClients, isLoading } = useClients();
   const [dashboardCurrency, setDashboardCurrency] = useState<Currency>("USD");
   const [clients, setClients] = useState<ParsedClient[]>([]);
@@ -123,7 +125,13 @@ function Dashboard({ sx }: { sx?: SxProps }) {
                 : await Convert(c.hourlyRate.amount)
                     .from(c.hourlyRate.currency)
                     .to(dashboardCurrency),
-          }))(),
+          }))().catch((error) => {
+            throwError(
+              error,
+              `converting ${c.hourlyRate.currency} to ${dashboardCurrency}`,
+            );
+            throw error;
+          }),
         ),
     ).then((parsedClients) => setClients(parsedClients));
   }, [allClients, dashboardCurrency]);
