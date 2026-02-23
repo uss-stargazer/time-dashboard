@@ -67,7 +67,6 @@ function Splash({ children }: PropsWithChildren) {
     const now = dayjs();
     const lastVisit = localStorage.getItem("last-visit");
     const lastVisitDate = !!lastVisit && dayjs(lastVisit);
-    console.log({ lastVisit, lastVisitDate });
     localStorage.setItem("last-visit", now.toString());
     return (
       (lastVisitDate &&
@@ -80,8 +79,6 @@ function Splash({ children }: PropsWithChildren) {
   useEffect(() => {
     setTimeout(() => setHide(true), 1500);
   }, []);
-
-  console.log({ hide });
 
   return (
     <Box>
