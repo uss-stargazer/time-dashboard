@@ -27,12 +27,14 @@ import { currencies, type Currency } from "../../modules/currencies";
 import useAsyncError from "../../hooks/useAsyncError";
 
 function DashboardPanel({
+  name,
   data,
   universalCurrency,
   moneyFormatter,
   Panel,
   ...props
 }: Omit<BoxProps, "children"> & {
+  name: string;
   data: DashboardData;
   universalCurrency: Currency;
   moneyFormatter: Intl.NumberFormat;
@@ -42,6 +44,7 @@ function DashboardPanel({
 
   return (
     <Card
+      label={name}
       sx={{
         borderColor: "primary.main",
         maxWidth: undefined,
@@ -101,9 +104,12 @@ function DashboardPanel({
   );
 }
 
-const dashboardPanelComponents: React.FC<DashboardPanelProps>[] = [
-  ExpectedVsActual,
-  Monthly,
+const dashboardPanelComponents: {
+  name: string;
+  fc: React.FC<DashboardPanelProps>;
+}[] = [
+  { name: "Expected v. Actual", fc: ExpectedVsActual },
+  { name: "Monthly", fc: Monthly },
 ];
 
 function Dashboard({ sx }: { sx?: SxProps }) {
@@ -212,9 +218,10 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           justifyContent: { xs: "center", sm: "center", md: "flex-start" },
         }}
       >
-        {dashboardPanelComponents.map((Panel) => (
+        {dashboardPanelComponents.map(({ name, fc }) => (
           <DashboardPanel
-            Panel={Panel}
+            name={name}
+            Panel={fc}
             data={data}
             moneyFormatter={moneyFormatter}
             universalCurrency={dashboardCurrency}
