@@ -3,24 +3,11 @@ import {
   type UncomputedClient,
 } from "../modules/clients";
 import trackers, { trackerNames, type TrackerName } from "../modules/trackers";
-import {
-  Controller,
-  FormProvider,
-  useForm,
-  useFormContext,
-} from "react-hook-form";
+import { FormProvider, useForm, useFormContext } from "react-hook-form";
 import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import type { KeyOfUnion } from "../modules/util";
-import {
-  Box,
-  Button,
-  FormControl,
-  FormHelperText,
-  InputLabel,
-  MenuItem,
-  Select,
-} from "@mui/material";
+import { Box, Button } from "@mui/material";
 import { FormNumberField, FormSelectField, FormTextField } from "./FormField";
 import Card from "./Card";
 import { currencies } from "../modules/currencies";
@@ -34,6 +21,7 @@ function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
         const field = key as KeyOfUnion<(typeof clientDataSchema)["shape"]>;
         return (
           <FormTextField
+            key={key}
             name={`tracker.data.${field}`}
             control={form.control}
           />
@@ -131,6 +119,7 @@ function ClientForm({
           </Button>
           {otherButtons?.map((btn) => (
             <Button
+              key={btn.label}
               variant="outlined"
               onClick={btn.onClick}
               disabled={buttonStatus === "disabled"}

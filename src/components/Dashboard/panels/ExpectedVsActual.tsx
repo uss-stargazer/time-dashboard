@@ -84,7 +84,7 @@ function DateInput({
       {presets && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
           {presets.map((preset) => (
-            <Box>
+            <Box key={preset.label}>
               <Radio
                 size="small"
                 checked={false}

@@ -203,7 +203,9 @@ function Dashboard({ sx }: { sx?: SxProps }) {
             sx={{ minWidth: 100 }}
           >
             {currencies.map((currency) => (
-              <MenuItem value={currency}>{currency}</MenuItem>
+              <MenuItem key={currency} value={currency}>
+                {currency}
+              </MenuItem>
             ))}
           </Select>
         </FormControl>
@@ -220,6 +222,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
       >
         {dashboardPanelComponents.map(({ name, fc }) => (
           <DashboardPanel
+            key={name}
             name={name}
             Panel={fc}
             data={data}

@@ -180,7 +180,7 @@ function Editor() {
               }
             />
           ) : (
-            <Card fullWidth sx={{ display: "flex" }}>
+            <Card key="add" fullWidth sx={{ display: "flex" }}>
               <Button sx={{ flexGrow: 1 }} onClick={() => setStagedClient({})}>
                 <Add />
               </Button>
