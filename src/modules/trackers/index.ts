@@ -30,7 +30,7 @@ export const trackerNames = Object.keys(trackers) as TrackerName[];
 // Discriminated unions for tracker data schemas
 const trackerDataDiscriminatees = trackerNames.map((name) =>
   z.object({
-    name: z.literal(name),
+    name: z.literal(name, "Invalid tracker name"),
     data: trackers[name].clientDataSchema,
     ...(trackers[name].computed && {
       computed: trackers[name].computed.dataSchema,
