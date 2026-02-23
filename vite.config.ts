@@ -32,8 +32,8 @@ const manifest: Partial<ManifestOptions> = {
       type: "image/png",
     },
   ],
-  theme_color: "#f69435",
-  background_color: "#f69435",
+  theme_color: "#242424",
+  background_color: "#242424",
 };
 
 // https://vite.dev/config/

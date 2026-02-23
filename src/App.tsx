@@ -14,12 +14,9 @@ import { ClientProvider } from "./hooks/useClients";
 const theme = createTheme({
   palette: {
     mode: "dark",
-    primary: {
-      main: "#ef6c00",
-    },
-    secondary: {
-      main: "#42a5f5",
-    },
+    primary: { main: "#ef6c00" },
+    secondary: { main: "#42a5f5" },
+    background: { default: "#303030" },
   },
   typography: { fontFamily: "'Fira Mono', monospace" },
 });
