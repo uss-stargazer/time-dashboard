@@ -19,9 +19,11 @@ export class TrackerError extends Error {
   }
 }
 
+export type ZodBaseComputedData = z.ZodType<Record<string, any>>;
+
 export interface Tracker<
   ClientDataSchema extends ZodBaseClientData,
-  ComputedDataSchema extends ZodBaseClientData,
+  ComputedDataSchema extends ZodBaseComputedData,
 > {
   prettyName: string;
   clientDataSchema: ClientDataSchema;
@@ -49,7 +51,7 @@ export interface Tracker<
 
 export const makeTracker = <
   ClientDataSchema extends ZodBaseClientData,
-  ComputedDataSchema extends ZodBaseClientData = z.ZodObject<{}>,
+  ComputedDataSchema extends ZodBaseComputedData = z.ZodObject<{}>,
 >(
   tracker: Tracker<ClientDataSchema, ComputedDataSchema>,
 ): Tracker<ClientDataSchema, ComputedDataSchema> => tracker;

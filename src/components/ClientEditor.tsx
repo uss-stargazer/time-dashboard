@@ -40,15 +40,13 @@ function Editor() {
     setLoadingClient(client.name);
 
     (async () => {
-      if (tracker.computed) {
-        console.log("hasComputed");
+      if (tracker.computed)
         client.tracker.computed = await tracker.computed
           // TODO: canceling if component reloads
           .compute(
             // @ts-expect-error TODO: better way. Like I said elsewhere, I'm tired trying to get ts to mesh
             client.tracker.data,
           );
-      }
       return client;
     })()
       .catch((error) => {

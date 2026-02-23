@@ -78,7 +78,6 @@ function ClientForm({
         component="form"
         faded={isHidden}
         onSubmit={form.handleSubmit((client: UncomputedClient) => {
-          console.log("submit clicked");
           // This check should really be a validate() option in the FormField, but I can't get it to work
           if (invalidNames.includes(client.name)) {
             form.setError("name", { message: "Name must be unique." });

@@ -105,9 +105,7 @@ const clockify = makeTracker({
   computed: {
     dataSchema: z.object({ clientId: z.string().regex(/[a-zA-Z\d]+/) }),
     compute: async (newClient, old, signal) => {
-      console.log("clockfify compute with", { newClient, old });
       if (!old || newClient.clientName !== old.data.clientName) {
-        console.log("actually computing");
         return {
           clientId: await fetchClientId(
             newClient.clientName,

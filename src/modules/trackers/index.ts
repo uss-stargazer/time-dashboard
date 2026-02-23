@@ -2,15 +2,17 @@ import z from "zod";
 import type { ZodBaseClientData } from "../clients";
 import { sample1, sample2 } from "./samples";
 import clockify from "./clockify";
-import type { Tracker } from "./definitions";
+import type { Tracker, ZodBaseComputedData } from "./definitions";
 import type { NonemptyArray } from "../util";
+import harvest from "./harvest";
 
 const trackers = {
   sample1,
   sample2,
   clockify,
+  harvest,
 } as const satisfies {
-  [key: string]: Tracker<ZodBaseClientData, ZodBaseClientData>;
+  [key: string]: Tracker<ZodBaseClientData, ZodBaseComputedData>;
 };
 
 // Remove sample trackers if not dev
@@ -41,11 +43,9 @@ export const TrackerUnion = z.discriminatedUnion(
     (typeof trackerDataDiscriminatees)[number]
   >,
 );
-console.log({ trackerDataDiscriminatees });
 const uncomputedTrackerDataDiscriminatees = trackerDataDiscriminatees.map(
   (d) => ("computed" in d.shape ? d.omit({ computed: true }) : d),
 );
-console.log({ uncomputedTrackerDataDiscriminatees });
 export const UncomputedTrackerUnion = z.discriminatedUnion(
   "name",
   uncomputedTrackerDataDiscriminatees as NonemptyArray<
