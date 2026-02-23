@@ -2,23 +2,16 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
-import useClients from "../../hooks/useClients";
-import trackers, { TrackerError } from "../../modules/trackers";
-import { useDashboardError } from "./DashboardPane";
+import trackers, { TrackerError } from "../../../modules/trackers";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
-import { formatMoney } from "../../modules/util";
+import { formatMoney } from "../../../modules/util";
+import type { DashboardPanelProps } from "../modules/definitions";
 
 type ClientDataGroup = { clientName: string; hours: number; income: number };
 
-function Monthly() {
-  const { clients, isLoading } = useClients();
-  if (clients.length === 0)
-    throw new Error("At least 1 client required for Monthly");
-  if (isLoading) throw new Error("Loaded clients required for Monthly");
-  const error = useDashboardError();
+function Monthly({ data, error }: DashboardPanelProps) {
   const theme = useTheme();
-
   const [month, setMonth] = useState<Dayjs>(() => dayjs().startOf("month"));
   const [clientData, setClientData] = useState<ClientDataGroup[] | undefined>(
     undefined,
@@ -36,7 +29,7 @@ function Monthly() {
     const controller = new AbortController();
 
     Promise.all(
-      clients.map((client) =>
+      data.clients.map((client) =>
         (async (): Promise<ClientDataGroup> => {
           const hours = await trackers[client.tracker.name]
             .getBillableHours(
@@ -66,7 +59,7 @@ function Monthly() {
       .then((clientDataGroups) => setClientData(clientDataGroups));
 
     return () => controller.abort();
-  }, [clients, month]);
+  }, [data.clients, month]);
 
   return (
     <>
@@ -99,7 +92,7 @@ function Monthly() {
       ) : (
         <BarChart
           height={300}
-          width={100 + 150 * clients.length}
+          width={100 + 150 * data.clients.length}
           dataset={clientData}
           xAxis={[{ dataKey: "clientName" }]}
           yAxis={[
