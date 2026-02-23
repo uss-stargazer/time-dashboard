@@ -8,6 +8,7 @@ import {
   type PropsWithChildren,
 } from "react";
 import { Box, Button, Typography } from "@mui/material";
+import trackers from "../modules/trackers";
 
 const ClientArraySchema = z.array(ClientSchema);
 
@@ -45,7 +46,32 @@ export function ClientProvider({
             throw new SyntaxError(
               "Invalid stored clients: has duplicate client names",
             );
-          setClients(clients);
+
+          Promise.all(
+            clients.map((client) =>
+              (async () => {
+                const tracker = trackers[client.tracker.name];
+                if (tracker.computed)
+                  client.tracker.computed = await tracker.computed.compute(
+                    // @ts-expect-error TODO: better way. Like I said elsewhere, I'm tired trying to get ts to mesh
+                    client.tracker.data,
+                  );
+                return client;
+              })(),
+            ),
+          )
+            .catch((error) => {
+              setError(
+                error instanceof Error ? error.message : JSON.stringify(error),
+              );
+              return undefined;
+            })
+            .then((clients) => {
+              if (clients) {
+                setClients(clients);
+                setError(null);
+              }
+            });
         } catch (error) {
           if (error instanceof ZodError) {
             setError(z.prettifyError(error));

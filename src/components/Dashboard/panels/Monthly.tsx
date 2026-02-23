@@ -2,10 +2,11 @@ import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import dayjs, { Dayjs } from "dayjs";
 import { useEffect, useState } from "react";
-import trackers, { TrackerError } from "../../../modules/trackers";
+import trackers from "../../../modules/trackers";
 import { Box, Button, Typography, useTheme } from "@mui/material";
 import { BarChart } from "@mui/x-charts";
 import type { DashboardPanelProps } from "../modules/definitions";
+import { TrackerError } from "../../../modules/trackers/definitions";
 
 type ClientDataGroup = { clientName: string; hours: number; income: number };
 
@@ -35,7 +36,7 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
               month,
               monthEnd,
               // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
-              client.tracker.data,
+              client.tracker,
               controller.signal,
             )
             .catch((error) => {

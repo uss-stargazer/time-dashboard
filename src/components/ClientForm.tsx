@@ -1,4 +1,7 @@
-import { ClientSchema, type Client } from "../modules/clients";
+import {
+  UncomputedClientSchema,
+  type UncomputedClient,
+} from "../modules/clients";
 import trackers, { trackerNames, type TrackerName } from "../modules/trackers";
 import {
   Controller,
@@ -22,7 +25,7 @@ import { FormNumberField, FormTextField } from "./FormField";
 import Card from "./Card";
 
 function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
-  const form = useFormContext<Client>();
+  const form = useFormContext<UncomputedClient>();
   const clientDataSchema = trackers[trackerName].clientDataSchema;
   return (
     <>
@@ -46,16 +49,18 @@ function ClientForm({
   onSubmit,
   otherButtons,
   isHidden,
+  buttonStatus = "normal",
 }: {
-  client: Partial<Client>;
+  client: Partial<UncomputedClient>;
   invalidNames: string[];
   submitText?: string;
-  onSubmit: (updated: Client) => void;
+  onSubmit: (updated: UncomputedClient) => void;
   otherButtons?: { label: string; onClick: () => void }[];
   isHidden?: boolean;
+  buttonStatus?: "normal" | "disabled" | "loading";
 }) {
-  const form = useForm<Client>({
-    resolver: zodResolver(ClientSchema),
+  const form = useForm<UncomputedClient>({
+    resolver: zodResolver(UncomputedClientSchema),
     defaultValues: client,
   });
   const [trackerName, setTrackerName] = useState<TrackerName | undefined>(
@@ -72,7 +77,8 @@ function ClientForm({
       <Card
         component="form"
         faded={isHidden}
-        onSubmit={form.handleSubmit((client: Client) => {
+        onSubmit={form.handleSubmit((client: UncomputedClient) => {
+          console.log("submit clicked");
           // This check should really be a validate() option in the FormField, but I can't get it to work
           if (invalidNames.includes(client.name)) {
             form.setError("name", { message: "Name must be unique." });
@@ -134,11 +140,21 @@ function ClientForm({
         <br />
 
         <Box sx={{ display: "flex", gap: 1 }}>
-          <Button type="submit" variant="contained">
+          <Button
+            type="submit"
+            variant="contained"
+            disabled={buttonStatus === "disabled"}
+            loading={buttonStatus === "loading"}
+          >
             {submitText}
           </Button>
           {otherButtons?.map((btn) => (
-            <Button variant="outlined" onClick={btn.onClick}>
+            <Button
+              variant="outlined"
+              onClick={btn.onClick}
+              disabled={buttonStatus === "disabled"}
+              loading={buttonStatus === "loading"}
+            >
               {btn.label}
             </Button>
           ))}

@@ -16,8 +16,9 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
-import trackers, { TrackerError } from "../../../modules/trackers";
+import trackers, { type TrackerName } from "../../../modules/trackers";
 import type { DashboardPanelProps } from "../modules/definitions";
+import { TrackerError } from "../../../modules/trackers/definitions";
 
 const EXPECTED_DAILY_HOURS = 8;
 const WEEKEND_DAYS = [0, 6];
@@ -123,7 +124,7 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
                 startDate,
                 endDate,
                 // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
-                client.tracker.data,
+                client.tracker,
                 controller.signal,
               )
               .catch((error) => {

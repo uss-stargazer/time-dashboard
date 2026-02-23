@@ -1,39 +1,17 @@
 import z from "zod";
 import type { ZodBaseClientData } from "../clients";
 import { sample1, sample2 } from "./samples";
-import type { Dayjs } from "dayjs";
-
-type GetBillableHours<ClientData> = (
-  from: Dayjs,
-  to: Dayjs,
-  client: ClientData,
-  signal?: AbortSignal,
-) => Promise<number>;
-
-export class TrackerError extends Error {
-  public tracker: TrackerName;
-  public clientName?: string;
-  constructor(tracker: TrackerName, message?: string) {
-    super(message);
-    this.tracker = tracker;
-  }
-}
-
-export interface Tracker<ClientDataSchema extends ZodBaseClientData> {
-  prettyName: string;
-  clientDataSchema: ClientDataSchema;
-  /** @throws {TrackerError} */
-  getBillableHours: GetBillableHours<z.infer<ClientDataSchema>>;
-}
-
-export const makeTracker = <ClientDataSchema extends ZodBaseClientData>(
-  tracker: Tracker<ClientDataSchema>,
-): Tracker<ClientDataSchema> => tracker;
+import clockify from "./clockify";
+import type { Tracker } from "./definitions";
+import type { NonemptyArray } from "../util";
 
 const trackers = {
   sample1,
   sample2,
-} as const satisfies { [key: string]: Tracker<ZodBaseClientData> };
+  clockify,
+} as const satisfies {
+  [key: string]: Tracker<ZodBaseClientData, ZodBaseClientData>;
+};
 
 // Remove sample trackers if not dev
 if (!import.meta.env.DEV) {
@@ -47,12 +25,32 @@ export type Trackers = typeof trackers;
 export type TrackerName = keyof Trackers;
 export const trackerNames = Object.keys(trackers) as TrackerName[];
 
-const unionSchemas = trackerNames.map((name) =>
-  z.object({ name: z.literal(name), data: trackers[name].clientDataSchema }),
+// Discriminated unions for tracker data schemas
+const trackerDataDiscriminatees = trackerNames.map((name) =>
+  z.object({
+    name: z.literal(name),
+    data: trackers[name].clientDataSchema,
+    ...(trackers[name].computed && {
+      computed: trackers[name].computed.dataSchema,
+    }),
+  }),
 );
-export const TrackerClientDataSchema = z.discriminatedUnion(
+export const TrackerUnion = z.discriminatedUnion(
   "name",
-  unionSchemas as [(typeof unionSchemas)[number], ...typeof unionSchemas],
+  trackerDataDiscriminatees as NonemptyArray<
+    (typeof trackerDataDiscriminatees)[number]
+  >,
+);
+console.log({ trackerDataDiscriminatees });
+const uncomputedTrackerDataDiscriminatees = trackerDataDiscriminatees.map(
+  (d) => ("computed" in d.shape ? d.omit({ computed: true }) : d),
+);
+console.log({ uncomputedTrackerDataDiscriminatees });
+export const UncomputedTrackerUnion = z.discriminatedUnion(
+  "name",
+  uncomputedTrackerDataDiscriminatees as NonemptyArray<
+    (typeof uncomputedTrackerDataDiscriminatees)[number]
+  >,
 );
 
 export default trackers;

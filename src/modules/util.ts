@@ -1,5 +1,7 @@
 export type KeyOfUnion<T> = T extends T ? keyof T : never;
 
+export type NonemptyArray<T> = [T, ...T[]];
+
 export const isUpperCase = (char: string): boolean =>
   char === char.toUpperCase() && char !== char.toLowerCase();
 
