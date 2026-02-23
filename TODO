@@ -1,4 +1,3 @@
-- Cool splash screen
 - Fix ts intersection for data when calling functions
 - Form control errors and undefined stuff in clientform
 - Ability to edit clients on broken local storage page
