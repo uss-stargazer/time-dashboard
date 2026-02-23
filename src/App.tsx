@@ -5,11 +5,12 @@ import {
   ThemeProvider,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState, type PropsWithChildren } from "react";
 import Dashboard from "./components/Dashboard";
 import { ErrorBoundary } from "react-error-boundary";
 import ClientEditor from "./components/ClientEditor";
 import { ClientProvider } from "./hooks/useClients";
+import dayjs from "dayjs";
 
 const theme = createTheme({
   palette: {
@@ -61,30 +62,97 @@ function ErrorFallback({ error }: { error: unknown }) {
   );
 }
 
+function Splash({ children }: PropsWithChildren) {
+  const [hide, setHide] = useState<true | undefined>(() => {
+    const now = dayjs();
+    const lastVisit = localStorage.getItem("last-visit");
+    const lastVisitDate = !!lastVisit && dayjs(lastVisit);
+    console.log({ lastVisit, lastVisitDate });
+    localStorage.setItem("last-visit", now.toString());
+    return (
+      (lastVisitDate &&
+        lastVisitDate.isValid() &&
+        lastVisitDate.isAfter(now.startOf("day"))) ||
+      undefined
+    );
+  });
+
+  useEffect(() => {
+    setTimeout(() => setHide(true), 1500);
+  }, []);
+
+  console.log({ hide });
+
+  return (
+    <Box>
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          zIndex: 10000,
+          width: "100vw",
+          height: "100vh",
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          textAlign: "center",
+          bgcolor: "black",
+          gap: 2,
+          ...(hide && {
+            visibility: "hidden",
+            opacity: 0,
+            transition: "visibility 1s 0.5s, opacity 1s 0.5s linear",
+          }),
+        }}
+      >
+        <Typography variant="h4" color="primary">
+          Time?
+        </Typography>
+        <Typography
+          sx={
+            hide && {
+              visibility: "hidden",
+              opacity: 0,
+              transition: "visibility 0s 1s, opacity 1s linear",
+            }
+          }
+        >
+          Is it really that... <br /> time again?
+        </Typography>
+      </Box>
+
+      {children}
+    </Box>
+  );
+}
+
 function App() {
   const [editClientsOpen, setEditClientsOpen] = useState<boolean>(false);
 
   return (
-    <ErrorBoundary FallbackComponent={ErrorFallback}>
-      <ThemeProvider theme={theme}>
-        <ClientProvider>
-          <Box
-            sx={{
-              minHeight: "100vh",
-              width: "100vw",
-              display: "flex",
-              flexDirection: "column",
-            }}
-          >
-            <Dashboard sx={{ flexGrow: 1, p: 2 }} />
-            <ClientEditor
-              isOpen={editClientsOpen}
-              setIsOpen={setEditClientsOpen}
-            />
-          </Box>
-        </ClientProvider>
-      </ThemeProvider>
-    </ErrorBoundary>
+    <ThemeProvider theme={theme}>
+      <Splash>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <ClientProvider>
+            <Box
+              sx={{
+                minHeight: "100vh",
+                width: "100vw",
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <Dashboard sx={{ flexGrow: 1, p: 2 }} />
+              <ClientEditor
+                isOpen={editClientsOpen}
+                setIsOpen={setEditClientsOpen}
+              />
+            </Box>
+          </ClientProvider>
+        </ErrorBoundary>
+      </Splash>
+    </ThemeProvider>
   );
 }
 
