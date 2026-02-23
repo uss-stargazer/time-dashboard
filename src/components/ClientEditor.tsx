@@ -11,22 +11,60 @@ import useClients from "../hooks/useClients";
 import { useState, type Ref } from "react";
 import type { Client } from "../modules/clients";
 import ClientForm from "./ClientForm";
-import { Add, Settings } from "@mui/icons-material";
+import { Add, Error as ErrorIcon, Settings } from "@mui/icons-material";
 import Card from "./Card";
 import { grey } from "@mui/material/colors";
+import trackers from "../modules/trackers";
 
 function Editor() {
   const clientData = useClients();
   const [stagedClient, setStagedClient] = useState<Partial<Client> | null>(
     null,
   );
+  const [loadingClient, setLoadingClient] = useState<string | null>(null);
+  const [error, setError] = useState<{
+    client: string;
+    message: string;
+  } | null>(null);
+
   if (clientData.isLoading) return <Button loading variant="outlined" />;
 
+  // Functions for editing clients
+
   const clientNames = clientData.clients.map((c) => c.name);
-  const addClient = (client: Client) => {
+  const addClient = (client: Client, cb?: () => void) => {
     if (clientNames.includes(client.name))
       throw new Error("Add client: client name must be unique");
-    clientData.setClients([...clientData.clients, client]);
+    const tracker = trackers[client.tracker.name];
+
+    setLoadingClient(client.name);
+
+    (async () => {
+      if (tracker.computed) {
+        console.log("hasComputed");
+        client.tracker.computed = await tracker.computed
+          // TODO: canceling if component reloads
+          .compute(
+            // @ts-expect-error TODO: better way. Like I said elsewhere, I'm tired trying to get ts to mesh
+            client.tracker.data,
+          );
+      }
+      return client;
+    })()
+      .catch((error) => {
+        setError({
+          client: client.name,
+          message:
+            error instanceof Error ? error.message : JSON.stringify(error),
+        });
+        throw error;
+      })
+      .then((client) => {
+        clientData.setClients([...clientData.clients, client]);
+        setError(null);
+        if (cb) cb();
+      })
+      .finally(() => setLoadingClient(null));
   };
   const removeClient = (clientName: string) => {
     if (clientData.clients.some((c) => c.name === clientName))
@@ -34,67 +72,124 @@ function Editor() {
         clientData.clients.filter((c) => c.name !== clientName),
       );
   };
-  const updateClient = (ogName: string, updated: Client) => {
+  const updateClient = (ogName: string, updated: Client, cb?: () => void) => {
+    const ogClient = clientData.clients.find((c) => c.name == ogName);
+    if (!ogClient) throw new Error("Update client: client does not exist");
     if (ogName !== updateClient.name && clientNames.includes(updateClient.name))
       throw new Error("Update client: new client name must be unique");
-    clientData.setClients([
-      ...clientData.clients.filter((c) => c.name !== ogName),
-      updated,
-    ]);
+    const filteredClients = clientData.clients.filter((c) => c !== ogClient);
+
+    setLoadingClient(ogName);
+
+    (async () => {
+      const tracker = trackers[updated.tracker.name];
+      if (tracker.computed)
+        updated.tracker.computed = await tracker.computed
+          // TODO: canceling if component reloads
+          .compute(
+            // @ts-expect-error TODO: better way. Like I said elsewhere, I'm tired trying to get ts to mesh
+            updated.tracker.data,
+            ogClient.tracker,
+          );
+      return updated;
+    })()
+      .catch((error) => {
+        setError({
+          client: ogName,
+          message:
+            error instanceof Error ? error.message : JSON.stringify(error),
+        });
+        throw error;
+      })
+      .then((client) => {
+        clientData.setClients([...filteredClients, client]);
+        setError(null);
+        if (cb) cb();
+      })
+      .finally(() => setLoadingClient(null));
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexWrap: "wrap",
-        gap: 2,
-      }}
-    >
-      {[
-        ...clientData.clients.map((client) => (
-          <ClientForm
-            key={client.name}
-            client={client}
-            invalidNames={clientNames.filter((c) => c !== client.name)}
-            submitText="Update"
-            onSubmit={(updated) => updateClient(client.name, updated)}
-            isHidden={client.isHidden}
-            otherButtons={[
-              { label: "Remove", onClick: () => removeClient(client.name) },
-              {
-                label: client.isHidden ? "Unhide" : "Hide",
-                onClick: () =>
-                  updateClient(client.name, {
-                    ...client,
-                    isHidden: !client.isHidden,
-                  }),
-              },
-            ]}
-          />
-        )),
-        stagedClient ? (
-          <ClientForm
-            key="staged"
-            client={stagedClient}
-            invalidNames={clientNames}
-            submitText="Add"
-            onSubmit={(client) => {
-              addClient(client);
-              setStagedClient(null);
-            }}
-            otherButtons={[
-              { label: "Cancel", onClick: () => setStagedClient(null) },
-            ]}
-          />
-        ) : (
-          <Card fullWidth sx={{ display: "flex" }}>
-            <Button sx={{ flexGrow: 1 }} onClick={() => setStagedClient({})}>
-              <Add />
-            </Button>
-          </Card>
-        ),
-      ]}
+    <Box sx={{ display: "flex", flexDirection: "column" }}>
+      {error && (
+        <Card sx={{ maxWidth: undefined, borderColor: "error.main" }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <ErrorIcon color="error" fontSize="small" />
+            <Typography color="error.main" variant="caption">
+              {`Tracker didn't like client ${error.client} `}
+            </Typography>
+          </Box>
+          <Typography variant="caption" m={1}>
+            {error.message}
+          </Typography>
+        </Card>
+      )}
+
+      <Box
+        sx={{
+          display: "flex",
+          flexWrap: "wrap",
+          gap: 2,
+        }}
+      >
+        {[
+          ...clientData.clients.map((client) => (
+            <ClientForm
+              key={client.name}
+              client={client}
+              invalidNames={clientNames.filter((c) => c !== client.name)}
+              submitText="Update"
+              onSubmit={(updated) => updateClient(client.name, updated)}
+              isHidden={client.isHidden}
+              otherButtons={[
+                { label: "Remove", onClick: () => removeClient(client.name) },
+                {
+                  label: client.isHidden ? "Unhide" : "Hide",
+                  onClick: () =>
+                    updateClient(client.name, {
+                      ...client,
+                      isHidden: !client.isHidden,
+                    }),
+                },
+              ]}
+              buttonStatus={
+                loadingClient
+                  ? loadingClient === client.name
+                    ? "loading"
+                    : "disabled"
+                  : "normal"
+              }
+            />
+          )),
+          stagedClient ? (
+            <ClientForm
+              key="staged"
+              client={stagedClient}
+              invalidNames={clientNames}
+              submitText="Add"
+              onSubmit={(client) =>
+                addClient(client, () => setStagedClient(null))
+              }
+              otherButtons={[
+                { label: "Cancel", onClick: () => setStagedClient(null) },
+              ]}
+              buttonStatus={
+                loadingClient
+                  ? loadingClient === stagedClient.name
+                    ? "loading"
+                    : "disabled"
+                  : "normal"
+              }
+            />
+          ) : (
+            <Card fullWidth sx={{ display: "flex" }}>
+              <Button sx={{ flexGrow: 1 }} onClick={() => setStagedClient({})}>
+                <Add />
+              </Button>
+            </Card>
+          ),
+        ]}
+      </Box>
     </Box>
   );
 }
