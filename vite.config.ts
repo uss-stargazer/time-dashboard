@@ -43,9 +43,9 @@ export default defineConfig({
     VitePWA({
       manifest,
       workbox: {
-        globPatterns: ["**/*"],
+        globPatterns: ["**/*.{js,css,html,ico,png,svg,webmanifest}"],
       },
-      includeAssets: ["**/*"],
+      includeAssets: ["images/*"],
     }),
   ],
 });
