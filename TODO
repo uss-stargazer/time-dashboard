@@ -7,7 +7,6 @@
   - Possible cache conersion rates for offline access (although the app is kinda uselss if ur offline)
 - Handling offline errors
   - Displays local storage error if cannot fetch computeddata
-- currency as select in clientform
 - (maybe) refactor in the future where projects are the unit instead of clients
 - Most trackers require a client name for the api so some ui mechanism for using the client id by default (while also giving option for different)
 - Card labels

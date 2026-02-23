@@ -1,4 +1,11 @@
-import { TextField } from "@mui/material";
+import {
+  FormControl,
+  FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
+  TextField,
+} from "@mui/material";
 import {
   Controller,
   type Control,
@@ -15,6 +22,7 @@ export type FormFieldProps<FormData extends FieldValues> = {
   name: Path<FormData>;
   control: Control<FormData>;
   options?: RegisterOptions<FormData, Path<FormData>>;
+  onChangeCb?: (value: unknown) => void;
 };
 
 export function FormTextField<FormData extends FieldValues>({
@@ -23,6 +31,7 @@ export function FormTextField<FormData extends FieldValues>({
   control,
   options,
   type,
+  onChangeCb,
 }: FormFieldProps<FormData>) {
   return (
     <Controller
@@ -38,7 +47,10 @@ export function FormTextField<FormData extends FieldValues>({
           type={type}
           value={value}
           placeholder={placeholder}
-          onChange={onChange}
+          onChange={(event) => {
+            onChange(event);
+            if (onChangeCb) onChangeCb(event.target.value);
+          }}
           onBlur={onBlur}
           inputRef={ref}
           helperText={error && error.message}
@@ -53,6 +65,7 @@ export function FormNumberField<FormData extends FieldValues>({
   name,
   control,
   options,
+  onChangeCb,
 }: FormFieldProps<FormData>) {
   return (
     <Controller
@@ -67,14 +80,67 @@ export function FormNumberField<FormData extends FieldValues>({
           allowFloat
           label={camelCaseToTitle(name.split(".").at(-1)!)}
           value={value}
-          onValueChange={(value) =>
-            onChange(typeof value === "string" ? parseFloat(value) : value)
-          }
+          onValueChange={(change) => {
+            const value =
+              typeof change === "string" ? parseFloat(change) : change;
+            onChange(value);
+            if (onChangeCb) onChangeCb(value);
+          }}
           onBlur={onBlur}
           inputRef={ref}
           helperText={error && error.message}
           errorMessage={error?.message}
         />
+      )}
+    />
+  );
+}
+
+export function FormSelectField<
+  FormData extends FieldValues,
+  ValueType extends string | number | readonly string[] | undefined,
+>({
+  name,
+  control,
+  options,
+  onChangeCb,
+  items,
+  minWidth = 120,
+}: FormFieldProps<FormData> & {
+  items: { label: string; value: ValueType }[];
+  minWidth?: number;
+}) {
+  const label = camelCaseToTitle(name.split(".").at(-1)!);
+  return (
+    <Controller
+      rules={options}
+      control={control}
+      name={name}
+      render={({
+        field: { value, onChange, onBlur, ref, name },
+        fieldState: { error },
+      }) => (
+        <FormControl sx={{ minWidth }} error={error && true}>
+          <InputLabel>{label}</InputLabel>
+          <Select
+            name={name}
+            label={label}
+            value={value}
+            onChange={(option) => {
+              onChange(option.target.value);
+              if (onChangeCb) onChangeCb(option.target.value);
+            }}
+            onBlur={onBlur}
+            inputRef={ref}
+          >
+            {items.map((option) => (
+              <MenuItem key={option.label} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </Select>
+          {error && <FormHelperText>{error.message}</FormHelperText>}
+        </FormControl>
       )}
     />
   );

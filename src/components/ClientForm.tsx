@@ -21,8 +21,9 @@ import {
   MenuItem,
   Select,
 } from "@mui/material";
-import { FormNumberField, FormTextField } from "./FormField";
+import { FormNumberField, FormSelectField, FormTextField } from "./FormField";
 import Card from "./Card";
+import { currencies } from "../modules/currencies";
 
 function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
   const form = useFormContext<UncomputedClient>();
@@ -96,41 +97,22 @@ function ClientForm({
               name="hourlyRate.amount"
               control={form.control}
             />
-            <FormTextField
+            <FormSelectField
               placeholder="Currency"
               name="hourlyRate.currency"
               control={form.control}
+              items={currencies.map((code) => ({ label: code, value: code }))}
+              minWidth={130}
             />
           </Box>
-          <Controller
-            control={form.control}
+          <FormSelectField
             name="tracker.name"
-            render={({
-              field: { value, onChange, onBlur, ref, name },
-              fieldState: { error },
-            }) => (
-              <FormControl sx={{ minWidth: 120 }} error={error && true}>
-                <InputLabel>Tracker</InputLabel>
-                <Select
-                  name={name}
-                  label="Tracker"
-                  value={value}
-                  onChange={(option) => {
-                    onChange(option.target.value);
-                    setTrackerName(option.target.value);
-                  }}
-                  onBlur={onBlur}
-                  inputRef={ref}
-                >
-                  {trackerOptions.map((option) => (
-                    <MenuItem key={option.label} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                {error && <FormHelperText>{error.message}</FormHelperText>}
-              </FormControl>
-            )}
+            control={form.control}
+            items={trackerOptions}
+            onChangeCb={(name) =>
+              trackerNames.includes(name as TrackerName) &&
+              setTrackerName(name as TrackerName)
+            }
           />
 
           {trackerName && <ClientDataForm trackerName={trackerName} />}
