@@ -10,7 +10,6 @@ import Dashboard from "./components/Dashboard";
 import { ErrorBoundary } from "react-error-boundary";
 import ClientEditor from "./components/ClientEditor";
 import { ClientProvider } from "./hooks/useClients";
-import dayjs from "dayjs";
 
 const theme = createTheme({
   palette: {
@@ -63,19 +62,7 @@ function ErrorFallback({ error }: { error: unknown }) {
 }
 
 function Splash({ children }: PropsWithChildren) {
-  const [hide, setHide] = useState<true | undefined>(() => {
-    const now = dayjs();
-    const lastVisit = localStorage.getItem("last-visit");
-    const lastVisitDate = !!lastVisit && dayjs(lastVisit);
-    localStorage.setItem("last-visit", now.toString());
-    return (
-      (lastVisitDate &&
-        lastVisitDate.isValid() &&
-        lastVisitDate.isAfter(now.startOf("day"))) ||
-      undefined
-    );
-  });
-
+  const [hide, setHide] = useState<true | undefined>(undefined);
   useEffect(() => {
     setTimeout(() => setHide(true), 1500);
   }, []);
