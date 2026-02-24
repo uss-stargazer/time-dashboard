@@ -50,7 +50,10 @@ function ClientForm({
 }) {
   const form = useForm<UncomputedClient>({
     resolver: zodResolver(UncomputedClientSchema),
-    defaultValues: client,
+    defaultValues: {
+      hourlyRate: { currency: "USD", ...client.hourlyRate },
+      ...client,
+    },
   });
   const [trackerName, setTrackerName] = useState<TrackerName | undefined>(
     client.tracker?.name,
