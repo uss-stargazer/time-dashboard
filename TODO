@@ -1,6 +1,5 @@
 - Fix ts intersection for data when calling functions
 - Form control errors and undefined stuff in clientform
-- Ability to edit clients on broken local storage page
 - Save dashboard currency in local storage
   - Possible cache conersion rates for offline access (although the app is kinda uselss if ur offline)
 - Handling offline errors
