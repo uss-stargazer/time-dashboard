@@ -2,20 +2,16 @@ import z from "zod";
 import { makeTracker, TrackerError } from "./definitions";
 import type { Dayjs } from "dayjs";
 
-const ClientsResponseSchema = z.object({
-  clients: z.array(z.object({ id: z.number(), name: z.string() })),
-});
 const TimeReportResponseSchema = z.object({
   results: z.array(
     z.object({
-      client_id: z.number(),
+      client_name: z.string(),
       billable_hours: z.number(),
     }),
   ),
 });
 
-const fetchClientId = async (
-  clientName: string,
+const fetchUser = async (
   data: {
     accountId: string;
     accessToken: string;
@@ -23,33 +19,30 @@ const fetchClientId = async (
     apiUserEmail: string;
   },
   signal?: AbortSignal,
-) => {
-  const response = await fetch("https://api.harvestapp.com/v2/clients", {
+): Promise<void> => {
+  const url = new URL("https://api.harvestapp.com/v2/users/me");
+  url.search = new URLSearchParams({
+    access_token: data.accessToken,
+    account_id: data.accountId,
+  }).toString();
+  const response = await fetch(url, {
     headers: {
-      "Harvest-Account-ID": data.accountId,
-      Authorization: `Bearer ${data.accessToken}`,
-      "User-Agent": `${data.apiUserCompany} (${data.apiUserEmail})`,
+      "User-Agent": `${data.apiUserCompany} Integration (${data.apiUserEmail})`,
     },
     signal,
   });
   if (!response.ok)
     throw new Error(
-      response.status === 401
+      response.status === 401 || response.status === 403
         ? "Harvest didn't like auth info"
         : "Harvest didn't like the request",
     );
-
-  const clients = ClientsResponseSchema.parse(await response.json()).clients;
-  const target = clients.find((c) => c.name === clientName);
-  if (!target)
-    throw new Error(`No Harvest client with name '${clientName}' found`);
-  return target.id;
 };
 
 const fetchTotalBillableHoursForClient = async (
   from: Dayjs,
   to: Dayjs,
-  clientId: number,
+  clientName: string,
   data: {
     accountId: string;
     accessToken: string;
@@ -73,7 +66,7 @@ const fetchTotalBillableHoursForClient = async (
   });
   if (!response.ok)
     throw new Error(
-      response.status === 401
+      response.status === 401 || response.status == 403
         ? "Harvest didn't like auth info"
         : "Harvest didn't like the request",
     );
@@ -81,9 +74,14 @@ const fetchTotalBillableHoursForClient = async (
   const clientReports = TimeReportResponseSchema.parse(
     await response.json(),
   ).results;
-  const target = clientReports.find((report) => report.client_id === clientId);
-  if (!target) throw new Error("No time report available for client");
-  return target.billable_hours;
+  const target = clientReports.find(
+    (report) => report.client_name === clientName,
+  );
+  if (!target)
+    console.warn(
+      "Harvest has no time report available for client; defaulting to 0. THIS CLIENT MAY NOT EXIST!",
+    );
+  return target?.billable_hours ?? 0;
 };
 
 const harvest = makeTracker({
@@ -103,27 +101,25 @@ const harvest = makeTracker({
   }),
 
   // Computed data is as necessary for Harvest however it allows
-  // validation of a client immediately after adding/updating.
+  // validation of auth info immediately after adding/updating.
+  // This however DOES NOT VALIDATE THAT THE CLIENT EXISTS.
   computed: {
-    dataSchema: z.object({ clientId: z.number() }),
+    dataSchema: z.object({}),
     async compute(newClient, old, signal) {
       if (!old || old.data.clientName !== newClient.clientName)
-        return {
-          clientId: await fetchClientId(
-            newClient.clientName,
-            {
-              ...newClient,
-              apiUserCompany: `${newClient.clientName} Integration`,
-            },
-            signal,
-          ).catch((error) => {
-            throw new TrackerError(
-              "harvest",
-              error instanceof Error ? error.message : JSON.stringify(error),
-            );
-          }),
-        };
-      return old.computed;
+        await fetchUser(
+          {
+            ...newClient,
+            apiUserCompany: newClient.clientName,
+          },
+          signal,
+        ).catch((error) => {
+          throw new TrackerError(
+            "harvest",
+            error instanceof Error ? error.message : JSON.stringify(error),
+          );
+        });
+      return {};
     },
   },
 
@@ -139,7 +135,7 @@ const harvest = makeTracker({
       client.computed.clientId,
       {
         ...client.data,
-        apiUserCompany: `${client.data.clientName} Integration`,
+        apiUserCompany: client.data.clientName,
       },
       signal,
     ).catch((error) => {
