@@ -100,6 +100,7 @@ const clockify = makeTracker({
     workspaceId: z.string().regex(/^[a-zA-Z\d]{24}$/, "Invalid workspace ID"),
     apiKey: z.string().regex(/^[a-zA-Z\d]{48}$/, "Invalid API key"),
   }),
+  secretsDataKeys: ["apiKey"],
 
   computed: {
     dataSchema: z.object({ clientId: z.string().regex(/[a-zA-Z\d]+/) }),

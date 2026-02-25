@@ -27,6 +27,7 @@ export interface Tracker<
 > {
   prettyName: string;
   clientDataSchema: ClientDataSchema;
+  secretsDataKeys?: (keyof z.infer<ClientDataSchema>)[];
 
   // Data under the 'computed' property isn't prompted by the
   // UI, but instead should be computed when clientData changes.

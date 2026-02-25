@@ -98,6 +98,7 @@ const harvest = makeTracker({
       .regex(/^\d+\.pt\.[a-zA-Z\d-_]+$/, "Invalid access token"),
     apiUserEmail: z.email(),
   }),
+  secretsDataKeys: ["accessToken"],
 
   // Computed data is as necessary for Harvest however it allows
   // validation of auth info immediately after adding/updating.
