@@ -5,6 +5,7 @@ import { TrackerUnion, UncomputedTrackerUnion } from "./trackers";
 export const BaseClientDataSchema = z.record(z.string(), z.string());
 export type ZodBaseClientData = z.ZodType<Record<string, string>>;
 
+export type ClientName = string;
 export const ClientSchema = z.object({
   name: z.string().nonempty("Required."),
   hourlyRate: z.object({

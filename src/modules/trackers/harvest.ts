@@ -97,7 +97,6 @@ const harvest = makeTracker({
       .nonempty("Required")
       .regex(/^\d+\.pt\.[a-zA-Z\d-_]+$/, "Invalid access token"),
     apiUserEmail: z.email(),
-    clientName: z.string().nonempty("Required"),
   }),
 
   // Computed data is as necessary for Harvest however it allows
@@ -105,11 +104,11 @@ const harvest = makeTracker({
   // This however DOES NOT VALIDATE THAT THE CLIENT EXISTS.
   computed: {
     dataSchema: z.object({}),
-    async compute(newClient, _, signal) {
+    async compute(clientName, newClient, _, signal) {
       await fetchUser(
         {
           ...newClient,
-          apiUserCompany: newClient.clientName,
+          apiUserCompany: clientName,
         },
         signal,
       ).catch((error) => {
@@ -122,8 +121,8 @@ const harvest = makeTracker({
     },
   },
 
-  async getBillableHours(from, to, client, signal) {
-    if (!client.computed)
+  async getBillableHours(from, to, { clientName, data, computed }, signal) {
+    if (!computed)
       throw new TrackerError(
         "harvest",
         "Harvest data was not computed; likely the app's error",
@@ -131,10 +130,10 @@ const harvest = makeTracker({
     return await fetchTotalBillableHoursForClient(
       from,
       to,
-      client.computed.clientId,
+      clientName,
       {
-        ...client.data,
-        apiUserCompany: client.data.clientName,
+        ...data,
+        apiUserCompany: clientName,
       },
       signal,
     ).catch((error) => {
