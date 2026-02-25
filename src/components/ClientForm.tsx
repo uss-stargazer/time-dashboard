@@ -14,7 +14,8 @@ import { currencies } from "../modules/currencies";
 
 function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
   const form = useFormContext<UncomputedClient>();
-  const clientDataSchema = trackers[trackerName].clientDataSchema;
+  const tracker = trackers[trackerName];
+  const clientDataSchema = tracker.clientDataSchema;
   return (
     <>
       {Object.keys(clientDataSchema.shape).map((key) => {
@@ -24,6 +25,11 @@ function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
             key={key}
             name={`tracker.data.${field}`}
             control={form.control}
+            type={
+              tracker.secretsDataKeys?.includes(field as never)
+                ? "password"
+                : undefined
+            }
           />
         );
       })}
