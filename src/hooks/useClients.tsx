@@ -53,6 +53,7 @@ export function ClientProvider({
                 const tracker = trackers[client.tracker.name];
                 if (tracker.computed)
                   client.tracker.computed = await tracker.computed.compute(
+                    client.name,
                     // @ts-expect-error TODO: better way. Like I said elsewhere, I'm tired trying to get ts to mesh
                     client.tracker.data,
                   );
