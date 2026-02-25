@@ -44,6 +44,7 @@ function Editor() {
         client.tracker.computed = await tracker.computed
           // TODO: canceling if component reloads
           .compute(
+            client.name,
             // @ts-expect-error TODO: better way. Like I said elsewhere, I'm tired trying to get ts to mesh
             client.tracker.data,
           );
@@ -86,6 +87,7 @@ function Editor() {
         updated.tracker.computed = await tracker.computed
           // TODO: canceling if component reloads
           .compute(
+            updated.name,
             // @ts-expect-error TODO: better way. Like I said elsewhere, I'm tired trying to get ts to mesh
             updated.tracker.data,
             ogClient.tracker,

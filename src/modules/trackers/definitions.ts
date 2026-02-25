@@ -1,6 +1,6 @@
 import type { Dayjs } from "dayjs";
 import type { TrackerName } from ".";
-import type { ZodBaseClientData } from "../clients";
+import type { ClientName, ZodBaseClientData } from "../clients";
 import type z from "zod";
 
 type GetBillableHours<ClientData> = (
@@ -33,6 +33,7 @@ export interface Tracker<
   computed?: {
     dataSchema: ComputedDataSchema;
     compute: (
+      clientName: ClientName,
       newClient: z.infer<ClientDataSchema>,
       old?: {
         data: z.infer<ClientDataSchema>;
@@ -44,6 +45,7 @@ export interface Tracker<
 
   /** @throws {TrackerError} */
   getBillableHours: GetBillableHours<{
+    clientName: ClientName;
     data: z.infer<ClientDataSchema>;
     computed: z.infer<ComputedDataSchema>;
   }>;

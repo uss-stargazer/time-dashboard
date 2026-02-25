@@ -99,27 +99,24 @@ const clockify = makeTracker({
   clientDataSchema: z.object({
     workspaceId: z.string().regex(/^[a-zA-Z\d]{24}$/, "Invalid workspace ID"),
     apiKey: z.string().regex(/^[a-zA-Z\d]{48}$/, "Invalid API key"),
-    clientName: z.string().nonempty("Required"),
   }),
 
   computed: {
     dataSchema: z.object({ clientId: z.string().regex(/[a-zA-Z\d]+/) }),
-    compute: async (newClient, _, signal) => ({
-      clientId: await fetchClientId(
-        newClient.clientName,
-        newClient,
-        signal,
-      ).catch((error) => {
-        throw new TrackerError(
-          "clockify",
-          error instanceof Error ? error.message : JSON.stringify(error),
-        );
-      }),
+    compute: async (clientName, newClient, _, signal) => ({
+      clientId: await fetchClientId(clientName, newClient, signal).catch(
+        (error) => {
+          throw new TrackerError(
+            "clockify",
+            error instanceof Error ? error.message : JSON.stringify(error),
+          );
+        },
+      ),
     }),
   },
 
-  async getBillableHours(from, to, client, signal) {
-    if (!client.computed)
+  async getBillableHours(from, to, { data, computed }, signal) {
+    if (!computed)
       throw new TrackerError(
         "clockify",
         "Clockify data was not computed; likely the app's error",
@@ -127,7 +124,7 @@ const clockify = makeTracker({
     return await fetchTotalBillableHoursForClient(
       from,
       to,
-      { ...client.data, ...client.computed },
+      { ...data, ...computed },
       signal,
     ).catch((error) => {
       throw new TrackerError(

@@ -36,7 +36,7 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
               month,
               monthEnd,
               // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
-              client.tracker,
+              { ...client.tracker, clientName: client.name },
               controller.signal,
             )
             .catch((error) => {
