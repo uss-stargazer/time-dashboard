@@ -105,20 +105,19 @@ const harvest = makeTracker({
   // This however DOES NOT VALIDATE THAT THE CLIENT EXISTS.
   computed: {
     dataSchema: z.object({}),
-    async compute(newClient, old, signal) {
-      if (!old || old.data.clientName !== newClient.clientName)
-        await fetchUser(
-          {
-            ...newClient,
-            apiUserCompany: newClient.clientName,
-          },
-          signal,
-        ).catch((error) => {
-          throw new TrackerError(
-            "harvest",
-            error instanceof Error ? error.message : JSON.stringify(error),
-          );
-        });
+    async compute(newClient, _, signal) {
+      await fetchUser(
+        {
+          ...newClient,
+          apiUserCompany: newClient.clientName,
+        },
+        signal,
+      ).catch((error) => {
+        throw new TrackerError(
+          "harvest",
+          error instanceof Error ? error.message : JSON.stringify(error),
+        );
+      });
       return {};
     },
   },

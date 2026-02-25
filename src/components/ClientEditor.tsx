@@ -69,6 +69,7 @@ function Editor() {
       clientData.setClients(
         clientData.clients.filter((c) => c.name !== clientName),
       );
+    if (clientName === error?.client) setError(null);
   };
   const updateClient = (ogName: string, updated: Client, cb?: () => void) => {
     const ogClient = clientData.clients.find((c) => c.name == ogName);
