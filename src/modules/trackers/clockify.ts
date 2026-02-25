@@ -104,23 +104,18 @@ const clockify = makeTracker({
 
   computed: {
     dataSchema: z.object({ clientId: z.string().regex(/[a-zA-Z\d]+/) }),
-    compute: async (newClient, old, signal) => {
-      if (!old || newClient.clientName !== old.data.clientName) {
-        return {
-          clientId: await fetchClientId(
-            newClient.clientName,
-            newClient,
-            signal,
-          ).catch((error) => {
-            throw new TrackerError(
-              "clockify",
-              error instanceof Error ? error.message : JSON.stringify(error),
-            );
-          }),
-        };
-      }
-      return old.computed;
-    },
+    compute: async (newClient, _, signal) => ({
+      clientId: await fetchClientId(
+        newClient.clientName,
+        newClient,
+        signal,
+      ).catch((error) => {
+        throw new TrackerError(
+          "clockify",
+          error instanceof Error ? error.message : JSON.stringify(error),
+        );
+      }),
+    }),
   },
 
   async getBillableHours(from, to, client, signal) {

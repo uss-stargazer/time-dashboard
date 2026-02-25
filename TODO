@@ -6,4 +6,5 @@
 - Handling offline errors
   - Displays local storage error if cannot fetch computeddata
 - (maybe) refactor in the future where projects are the unit instead of clients
-- Most trackers require a client name for the api so some ui mechanism for using the client id by default (while also giving option for different)
+- Automatically pass client name (and remove invidual tracker prompts)
+- Password input type for access tokens
