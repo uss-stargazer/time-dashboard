@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "vite",
     "test": "vitest",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && npm run test run && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
