@@ -7,8 +7,8 @@ const manifest: Partial<ManifestOptions> = {
   name: pkg.name,
   short_name: pkg.name,
   description: pkg.description,
-  scope: "/time-dashboard/",
-  start_url: "/time-dashboard/",
+  scope: "/",
+  start_url: "/",
   display: "standalone",
   icons: [
     {
@@ -48,5 +48,4 @@ export default defineConfig({
       includeAssets: ["images/*"],
     }),
   ],
-  base: "/time-dashboard/",
 });
