@@ -12,14 +12,16 @@ export const getExpectedHours = (start: Dayjs, end: Dayjs): number => {
     throw new Error("getExpectedHours: start must be before or equal to end");
   const nWeeks = Math.floor(daysBetween / 7);
   const weekOffset = daysBetween % 7;
-  let nWeekDays = nWeeks * 5 + weekOffset;
+  let nWeekDays = nWeeks * 5;
 
   const startDay = start.day();
-  if ((startDay + weekOffset) % 7 !== (end.day() + 1) % 7)
-    throw new Error("getExpectedHours failed sanity check");
+
   for (let i = 0; i < weekOffset; i++) {
     const day = (startDay + i) % 7;
-    if (WEEKEND_DAYS.includes(day)) nWeekDays--;
+    const isWeekday = !WEEKEND_DAYS.includes(day);
+    if (isWeekday) {
+      nWeekDays++;
+    }
   }
 
   return nWeekDays * EXPECTED_DAILY_HOURS;
