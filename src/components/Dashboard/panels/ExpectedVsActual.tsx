@@ -8,7 +8,6 @@ import {
   TableBody,
   TableCell,
   TableContainer,
-  TableHead,
   TableRow,
   Typography,
 } from "@mui/material";
@@ -20,8 +19,7 @@ import { useEffect, useState } from "react";
 import trackers from "../../../modules/trackers";
 import type { ClientWithBillableHours, DashboardPanelProps, ParsedClient } from "../modules/definitions";
 import { TrackerError } from "../../../modules/trackers/definitions";
-import { getExpectedValues } from "../modules/client-computations";
-
+import { getActualValues, getExpectedValues } from "../modules/client-computations";
 
 type BillableHoursResult = {
   loading: true,
@@ -30,8 +28,6 @@ type BillableHoursResult = {
   loading: false,
   clients: ClientWithBillableHours[],
 }
-
-type Row = { name: string; expected: string; actual?: string };
 
 function fetchBillableHours(
   clients: ParsedClient[],
@@ -158,40 +154,7 @@ function ExpectedVsActual({ data: initialData, error, money }: DashboardPanelPro
   }, [initialData.clients, endDate, error, startDate]);
 
   const expected = getExpectedValues(startDate, endDate, data.clients, money);
-  const actualHours = data.loading ? undefined : data.clients.reduce((sum, c) => sum + c.billableHours, 0);
-  const actualIncome = data.loading ? undefined : data.clients.reduce((sum, c) => sum + c.billableHours * c.hourlyRate, 0);
-
-  const rows: Row[] = [
-    {
-      name: "Hours",
-      expected: expected.hours.display,
-      actual: actualHours?.toFixed(2),
-    },
-    ...(data.clients.length === 1
-      ? [{
-        name: "Income",
-        expected: expected.income.avg.display,
-        actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
-      }]
-      : [
-        {
-          name: "Income (min)",
-          expected: expected.income.min.display,
-          actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
-        },
-        {
-          name: "Income (avg)",
-          expected: expected.income.avg.display,
-          actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
-        },
-        {
-          name: "Income (max)",
-          expected: expected.income.max.display,
-          actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
-        },
-      ]
-    ),
-  ];
+  const actual = data.loading ? "loading" : getActualValues(data.clients, expected, money);
 
   return (
     <>
@@ -231,47 +194,141 @@ function ExpectedVsActual({ data: initialData, error, money }: DashboardPanelPro
         </LocalizationProvider>
       </Stack>
 
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "background.paper" }}>
-              <TableCell />
-              <TableCell
-                variant="head"
-                align="center"
-                sx={{ color: "primary.main", width: 10, p: 2 }}
-              >
-                Actual
-              </TableCell>
-              <TableCell
-                variant="head"
-                align="center"
-                sx={{ color: "primary.main", width: 10, p: 2 }}
-              >
-                Expected
-              </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {rows.map((row) => (
-              <TableRow
-                key={row.name}
-                sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
-              >
-                <TableCell component="th" scope="row" align="right">
-                  {row.name}
-                </TableCell>
-                <TableCell align="right" color="primary.main">
-                  {row.actual !== undefined ? row.actual : <CircularProgress size={12} />}
-                </TableCell>
-                <TableCell align="right" color="primary.main">
-                  {row.expected}
-                </TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
+      <Stack gap={2} sx={{ my: 2 }}>
+        <Box>
+          <Typography variant="h6">Over/under</Typography>
+
+          <TableContainer component={Paper}>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Hours</TableCell>
+
+                  <TableCell align="right">
+                    {actual === "loading" && <CircularProgress size={12} />}
+                    {actual !== "loading" && actual.hours.overUnder.display}</TableCell>
+                </TableRow>
+
+                {data.clients.length === 1 ? (
+                  <TableRow>
+                    <TableCell>Income</TableCell>
+
+                    <TableCell align="right">
+                      {actual === "loading" && <CircularProgress size={12} />}
+                      {actual !== "loading" && actual.income.overUnder.avg.display}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  <>
+                    <TableRow>
+                      <TableCell>Income (min)</TableCell>
+
+                      <TableCell align="right">
+                        {actual === "loading" && <CircularProgress size={12} />}
+                        {actual !== "loading" && actual.income.overUnder.min.display}
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell>Income (avg)</TableCell>
+
+                      <TableCell align="right">
+                        {actual === "loading" && <CircularProgress size={12} />}
+                        {actual !== "loading" && actual.income.overUnder.avg.display}
+                      </TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell>Income (max)</TableCell>
+
+                      <TableCell align="right">
+                        {actual === "loading" && <CircularProgress size={12} />}
+                        {actual !== "loading" && actual.income.overUnder.max.display}
+                      </TableCell>
+                    </TableRow>
+                  </>
+                )}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        <Box>
+          <Typography variant="h6">
+            Hours
+          </Typography>
+
+          <TableContainer component={Paper}>
+            <Table>
+              <TableBody>
+                <TableRow>
+                  <TableCell>Expected</TableCell>
+
+                  <TableCell align="right">{expected.hours.display}</TableCell>
+                </TableRow>
+
+                <TableRow>
+                  <TableCell>Actual</TableCell>
+
+                  <TableCell align="right">
+                    {actual === "loading" && <CircularProgress size={12} />}
+                    {actual !== "loading" && actual.hours.display}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+
+        <Box>
+          <Typography variant="h6">
+            Income
+          </Typography>
+
+          <TableContainer component={Paper}>
+            <Table>
+              <TableBody>
+                {data.clients.length === 1 ? (
+                  <TableRow>
+                    <TableCell>Expected</TableCell>
+
+                    <TableCell align="right">{expected.income.min.display}</TableCell>
+                  </TableRow>
+                ) : (
+                  <>
+                    <TableRow>
+                      <TableCell>Expected (min)</TableCell>
+
+                      <TableCell align="right">{expected.income.min.display}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell>Expected (avg)</TableCell>
+
+                      <TableCell align="right">{expected.income.avg.display}</TableCell>
+                    </TableRow>
+
+                    <TableRow>
+                      <TableCell>Expected (max)</TableCell>
+
+                      <TableCell align="right">{expected.income.max.display}</TableCell>
+                    </TableRow>
+                  </>
+                )}
+
+                <TableRow>
+                  <TableCell>Actual</TableCell>
+
+                  <TableCell align="right">
+                    {actual === "loading" && <CircularProgress size={12} />}
+                    {actual !== "loading" && actual.income.display}
+                  </TableCell>
+                </TableRow>
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </Box>
+      </Stack>
     </>
   );
 }
