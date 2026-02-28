@@ -10,6 +10,11 @@ export type ClientWithBillableHours = ParsedClient & {
   billableHours: number;
 };
 
+export interface Money {
+  currency: Currency;
+  format: (amount: number) => string;
+}
+
 export type DashboardErrorType = {
   tracker?: TrackerName;
   clientName?: string;
@@ -19,15 +24,11 @@ export type DashboardErrorType = {
 // Data that only has to be computed once for performance
 export type DashboardData = {
   clients: [ParsedClient, ...ParsedClient[]];
-  rate: number | { avg: number; min: number; max: number };
 };
 
 export type DashboardPanelProps = {
   data: DashboardData;
-  money: {
-    currency: Currency;
-    format: (amount: number) => string;
-  };
+  money: Money;
   error: {
     throw: (error: unknown) => void;
     reset: () => void;

@@ -20,7 +20,16 @@ import { useEffect, useState } from "react";
 import trackers from "../../../modules/trackers";
 import type { ClientWithBillableHours, DashboardPanelProps, ParsedClient } from "../modules/definitions";
 import { TrackerError } from "../../../modules/trackers/definitions";
-import { getExpectedHours } from "../modules/time";
+import { getExpectedValues } from "../modules/client-computations";
+
+
+type BillableHoursResult = {
+  loading: true,
+  clients: ParsedClient[],
+} | {
+  loading: false,
+  clients: ClientWithBillableHours[],
+}
 
 type Row = { name: string; expected: string; actual?: string };
 
@@ -106,20 +115,23 @@ function DateInput({
   );
 }
 
-function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
+function ExpectedVsActual({ data: initialData, error, money }: DashboardPanelProps) {
   const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
   const [startDate, setStartDate] = useState<Dayjs>(() =>
     dayjs().startOf("month"),
   );
 
-  const [actualHours, setActualHours] = useState<number | undefined>(undefined);
+  const [data, setData] = useState<BillableHoursResult>({
+    loading: true,
+    clients: initialData.clients,
+  });
 
   useEffect(() => {
     const controller = new AbortController();
     let timeoutId: number;
 
     new Promise((resolve) => {
-      setActualHours(undefined);
+      setData({ loading: true, clients: initialData.clients });
       resolve(undefined);
     }).then(() =>
       new Promise((resolve) => {
@@ -127,7 +139,7 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
         timeoutId = setTimeout(resolve, 1000);
       }))
       .then(() =>
-        fetchBillableHours(data.clients, startDate, endDate, controller.signal),
+        fetchBillableHours(initialData.clients, startDate, endDate, controller.signal)
       )
       .catch((err) => {
         controller.abort();
@@ -136,34 +148,49 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
       })
       .then((clients) => {
         error.reset();
-        setActualHours(
-          clients.reduce((total, c) => total + c.billableHours, 0),
-        );
+        setData({ loading: false, clients });
       });
 
     return () => {
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [data.clients, startDate, endDate]);
+  }, [initialData.clients, endDate, error, startDate]);
 
-  const expectedHours = getExpectedHours(startDate, endDate);
+  const expected = getExpectedValues(startDate, endDate, data.clients, money);
+  const actualHours = data.loading ? undefined : data.clients.reduce((sum, c) => sum + c.billableHours, 0);
+  const actualIncome = data.loading ? undefined : data.clients.reduce((sum, c) => sum + c.billableHours * c.hourlyRate, 0);
+
   const rows: Row[] = [
     {
       name: "Hours",
-      expected: expectedHours.toFixed(2),
+      expected: expected.hours.display,
       actual: actualHours?.toFixed(2),
     },
-    ...Object.entries(
-      typeof data.rate === "number" ? { single: data.rate } : data.rate,
-    ).map(([stat, rate]) => ({
-      name: `Income (${stat})`,
-      expected: money.format(expectedHours * rate),
-      actual:
-        actualHours !== undefined
-          ? money.format(actualHours * rate)
-          : undefined,
-    })),
+    ...(data.clients.length === 1
+      ? [{
+        name: "Income",
+        expected: expected.income.avg.display,
+        actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
+      }]
+      : [
+        {
+          name: "Income (min)",
+          expected: expected.income.min.display,
+          actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
+        },
+        {
+          name: "Income (avg)",
+          expected: expected.income.avg.display,
+          actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
+        },
+        {
+          name: "Income (max)",
+          expected: expected.income.max.display,
+          actual: actualIncome !== undefined ? money.format(actualIncome) : undefined,
+        },
+      ]
+    ),
   ];
 
   return (
