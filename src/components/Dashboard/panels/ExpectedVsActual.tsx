@@ -119,9 +119,13 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
     let timeoutId: number;
 
     new Promise((resolve) => {
-      // Small buffer timeout to prevent making and aborting a bunch of network calls during rapid changes
-      timeoutId = setTimeout(resolve, 1000);
-    })
+      setActualHours(undefined);
+      resolve(undefined);
+    }).then(() =>
+      new Promise((resolve) => {
+        // Small buffer timeout to prevent making and aborting a bunch of network calls during rapid changes
+        timeoutId = setTimeout(resolve, 1000);
+      }))
       .then(() =>
         fetchBillableHours(data.clients, startDate, endDate, controller.signal),
       )
