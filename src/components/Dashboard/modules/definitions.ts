@@ -6,6 +6,10 @@ export type ParsedClient = Omit<Client, "hourlyRate" | "isHidden"> & {
   hourlyRate: number;
 };
 
+export type ClientWithBillableHours = ParsedClient & {
+  billableHours: number;
+};
+
 export type DashboardErrorType = {
   tracker?: TrackerName;
   clientName?: string;
