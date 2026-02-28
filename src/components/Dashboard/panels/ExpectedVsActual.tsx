@@ -230,10 +230,10 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
                 <TableCell component="th" scope="row" align="right">
                   {row.name}
                 </TableCell>
-                <TableCell align="center" color="primary.main">
+                <TableCell align="right" color="primary.main">
                   {row.actual !== undefined ? row.actual : <CircularProgress size={12} />}
                 </TableCell>
-                <TableCell align="center" color="primary.main">
+                <TableCell align="right" color="primary.main">
                   {row.expected}
                 </TableCell>
               </TableRow>
