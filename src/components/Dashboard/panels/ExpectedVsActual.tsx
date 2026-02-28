@@ -18,11 +18,38 @@ import { Dayjs } from "dayjs";
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import trackers from "../../../modules/trackers";
-import type { DashboardPanelProps } from "../modules/definitions";
+import type { ClientWithBillableHours, DashboardPanelProps, ParsedClient } from "../modules/definitions";
 import { TrackerError } from "../../../modules/trackers/definitions";
 import { getExpectedHours } from "../modules/time";
 
 type Row = { name: string; expected: string; actual?: string };
+
+function fetchBillableHours(
+  clients: ParsedClient[],
+  startDate: Dayjs,
+  endDate: Dayjs,
+  signal: AbortSignal,
+): Promise<ClientWithBillableHours[]> {
+  return Promise.all(
+    clients.map(async (client) => {
+      const billableHours = await trackers[client.tracker.name]
+        .getBillableHours(
+          startDate,
+          endDate,
+          // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
+          { ...client.tracker, clientName: client.name },
+          signal
+        )
+        .catch((error) => {
+          if (error instanceof TrackerError)
+            error.clientName = client.name;
+          throw error;
+        });
+
+      return { ...client, billableHours };
+    }),
+  );
+}
 
 function DateInput({
   label,
@@ -96,37 +123,17 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
       timeoutId = setTimeout(resolve, 1000);
     })
       .then(() =>
-        Promise.all(
-          data.clients.map((client) =>
-            trackers[client.tracker.name]
-              .getBillableHours(
-                startDate,
-                endDate,
-                // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
-                { ...client.tracker, clientName: client.name },
-                controller.signal,
-              )
-              .catch((error) => {
-                if (error instanceof TrackerError)
-                  error.clientName = client.name;
-                throw error;
-              }),
-          ),
-        ),
+        fetchBillableHours(data.clients, startDate, endDate, controller.signal),
       )
       .catch((err) => {
         controller.abort();
         error.throw(err);
         throw err;
       })
-      .then((clientTotalHours) => {
+      .then((clients) => {
         error.reset();
         setActualHours(
-          clientTotalHours &&
-            clientTotalHours.reduce(
-              (total, clientHours) => total + clientHours,
-              0,
-            ),
+          clients.reduce((total, c) => total + c.billableHours, 0),
         );
       });
 
