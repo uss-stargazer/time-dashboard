@@ -183,6 +183,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
   const moneyFormatter = new Intl.NumberFormat(undefined, {
     style: "currency",
     currency: dashboardCurrency,
+    currencySign: "accounting",
   });
 
   return (
