@@ -169,16 +169,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
 
   const data: DashboardData = {
     clients: clients as [ParsedClient, ...ParsedClient[]], // clients.length must be greater than zero
-    rate: clients[0].hourlyRate,
   };
-  if (clients.length > 1) {
-    const rates = clients.map((c) => c.hourlyRate);
-    data.rate = {
-      avg: rates.reduce((sum, v) => sum + v, 0) / rates.length,
-      min: Math.min(...rates),
-      max: Math.max(...rates),
-    };
-  }
 
   const moneyFormatter = new Intl.NumberFormat(undefined, {
     style: "currency",
