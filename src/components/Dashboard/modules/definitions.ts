@@ -12,7 +12,7 @@ export type DashboardErrorType = {
   message: string;
 };
 
-// Data that only has to be computed once for preformance
+// Data that only has to be computed once for performance
 export type DashboardData = {
   clients: [ParsedClient, ...ParsedClient[]];
   rate: number | { avg: number; min: number; max: number };
