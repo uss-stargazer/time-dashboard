@@ -1,8 +1,9 @@
 import {
   Box,
-  Button,
+  CircularProgress,
   Paper,
   Radio,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -156,12 +157,8 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
 
   return (
     <>
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          gap: 1,
-        }}
+      <Stack
+        gap={1}
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DateInput
@@ -194,7 +191,7 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
             presets={[{ label: "today", onClick: () => setEndDate(dayjs()) }]}
           />
         </LocalizationProvider>
-      </Box>
+      </Stack>
 
       <TableContainer component={Paper}>
         <Table>
@@ -227,7 +224,7 @@ function ExpectedVsActual({ data, error, money }: DashboardPanelProps) {
                   {row.name}
                 </TableCell>
                 <TableCell align="center" color="primary.main">
-                  {row.actual !== undefined ? row.actual : <Button loading />}
+                  {row.actual !== undefined ? row.actual : <CircularProgress size={12} />}
                 </TableCell>
                 <TableCell align="center" color="primary.main">
                   {row.expected}
