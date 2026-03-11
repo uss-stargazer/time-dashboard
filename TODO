@@ -5,3 +5,7 @@
 - Handling offline errors
   - Displays local storage error if cannot fetch computeddata
 - (maybe) refactor in the future where projects are the unit instead of clients
+- use react query 
+- unify all the dahsboard for the same date range
+- passkeys
+- database settings for realestate
