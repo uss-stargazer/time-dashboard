@@ -84,7 +84,7 @@ export function ClientProvider({
     }).finally(() => setIsLoading(false));
   };
 
-  useEffect(loadData, []);
+  useEffect(loadData, [storageKey]);
 
   const setClientsWStorage: ClientContextType["setClients"] = (updated) => {
     localStorage.setItem(storageKey, JSON.stringify(updated));

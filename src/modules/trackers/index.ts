@@ -17,9 +17,9 @@ const trackers = {
 
 // Remove sample trackers if not dev
 if (!import.meta.env.DEV) {
-  // @ts-expect-error
+  // @ts-expect-error Remove sample tracker 1
   delete trackers.sample1;
-  // @ts-expect-error
+  // @ts-expect-error Remove sample tracker 2
   delete trackers.sample2;
 }
 

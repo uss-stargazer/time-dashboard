@@ -140,7 +140,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           }),
         ),
     ).then((parsedClients) => setClients(parsedClients));
-  }, [allClients, dashboardCurrency]);
+  }, [allClients, dashboardCurrency, throwError]);
 
   if (isLoading || clients.length === 0)
     return (

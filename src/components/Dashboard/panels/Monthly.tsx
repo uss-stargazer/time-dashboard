@@ -62,7 +62,7 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
       });
 
     return () => controller.abort();
-  }, [data.clients, month]);
+  }, [data.clients, month, error, monthEnd]);
 
   return (
     <Box

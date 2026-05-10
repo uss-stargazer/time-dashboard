@@ -44,7 +44,6 @@ export default function NumberField({
   maxValue = NaN,
   minValue = NaN,
   decimalLimit = NaN,
-  helperText,
   InputProps,
   inputProps,
   errorMessage,
@@ -66,6 +65,7 @@ export default function NumberField({
   const [fieldValue, setFieldValue] = useState<string>((value || "") as string);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFieldValue((value || "") as string);
   }, [value]);
 
@@ -85,7 +85,7 @@ export default function NumberField({
 
     if (allowFloat && !Number.isNaN(decimalLimit)) {
       // check for the length of decimal digits
-      const [_, decimals] = inputValue.split(".");
+      const [, decimals] = inputValue.split(".");
 
       if (decimals?.length > decimalLimit) return;
     }

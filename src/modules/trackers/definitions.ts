@@ -19,7 +19,7 @@ export class TrackerError extends Error {
   }
 }
 
-export type ZodBaseComputedData = z.ZodType<Record<string, any>>;
+export type ZodBaseComputedData = z.ZodType<Record<string, unknown>>;
 
 export interface Tracker<
   ClientDataSchema extends ZodBaseClientData,
@@ -54,7 +54,7 @@ export interface Tracker<
 
 export const makeTracker = <
   ClientDataSchema extends ZodBaseClientData,
-  ComputedDataSchema extends ZodBaseComputedData = z.ZodObject<{}>,
+  ComputedDataSchema extends ZodBaseComputedData = z.ZodObject<{}>, // eslint-disable-line @typescript-eslint/no-empty-object-type
 >(
   tracker: Tracker<ClientDataSchema, ComputedDataSchema>,
 ): Tracker<ClientDataSchema, ComputedDataSchema> => tracker;
