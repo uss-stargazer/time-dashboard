@@ -1,16 +1,16 @@
 import {
   UncomputedClientSchema,
   type UncomputedClient,
-} from "../modules/clients";
-import trackers, { trackerNames, type TrackerName } from "../modules/trackers";
-import { FormProvider, useForm, useFormContext } from "react-hook-form";
-import { useState } from "react";
-import { zodResolver } from "@hookform/resolvers/zod";
-import type { KeyOfUnion } from "../modules/util";
-import { Box, Button } from "@mui/material";
-import { FormNumberField, FormSelectField, FormTextField } from "./FormField";
-import Card from "./Card";
-import { currencies } from "../modules/currencies";
+} from '../modules/clients';
+import trackers, { trackerNames, type TrackerName } from '../modules/trackers';
+import { FormProvider, useForm, useFormContext } from 'react-hook-form';
+import { useState } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import type { KeyOfUnion } from '../modules/util';
+import { Box, Button } from '@mui/material';
+import { FormNumberField, FormSelectField, FormTextField } from './FormField';
+import Card from './Card';
+import { currencies } from '../modules/currencies';
 
 function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
   const form = useFormContext<UncomputedClient>();
@@ -19,7 +19,7 @@ function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
   return (
     <>
       {Object.keys(clientDataSchema.shape).map((key) => {
-        const field = key as KeyOfUnion<(typeof clientDataSchema)["shape"]>;
+        const field = key as KeyOfUnion<(typeof clientDataSchema)['shape']>;
         return (
           <FormTextField
             key={key}
@@ -27,7 +27,7 @@ function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
             control={form.control}
             type={
               tracker.secretsDataKeys?.includes(field as never)
-                ? "password"
+                ? 'password'
                 : undefined
             }
           />
@@ -40,11 +40,11 @@ function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
 function ClientForm({
   client,
   invalidNames,
-  submitText = "Submit",
+  submitText = 'Submit',
   onSubmit,
   otherButtons,
   isHidden,
-  buttonStatus = "normal",
+  buttonStatus = 'normal',
 }: {
   client: Partial<UncomputedClient>;
   invalidNames: string[];
@@ -52,12 +52,12 @@ function ClientForm({
   onSubmit: (updated: UncomputedClient) => void;
   otherButtons?: { label: string; onClick: () => void }[];
   isHidden?: boolean;
-  buttonStatus?: "normal" | "disabled" | "loading";
+  buttonStatus?: 'normal' | 'disabled' | 'loading';
 }) {
   const form = useForm<UncomputedClient>({
     resolver: zodResolver(UncomputedClientSchema),
     defaultValues: {
-      hourlyRate: { currency: "USD", ...client.hourlyRate },
+      hourlyRate: { currency: 'USD', ...client.hourlyRate },
       ...client,
     },
   });
@@ -73,37 +73,37 @@ function ClientForm({
   return (
     <FormProvider {...form}>
       <Card
-        component="form"
+        component='form'
         faded={isHidden}
         onSubmit={form.handleSubmit((client: UncomputedClient) => {
           // This check should really be a validate() option in the FormField, but I can't get it to work
           if (invalidNames.includes(client.name)) {
-            form.setError("name", { message: "Name must be unique." });
+            form.setError('name', { message: 'Name must be unique.' });
           } else onSubmit(client);
         })}
       >
-        <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <FormTextField
-            placeholder="Name"
-            name="name"
+            placeholder='Name'
+            name='name'
             control={form.control}
           />
-          <Box sx={{ display: "flex" }}>
+          <Box sx={{ display: 'flex' }}>
             <FormNumberField
-              placeholder="Rate amount"
-              name="hourlyRate.amount"
+              placeholder='Rate amount'
+              name='hourlyRate.amount'
               control={form.control}
             />
             <FormSelectField
-              placeholder="Currency"
-              name="hourlyRate.currency"
+              placeholder='Currency'
+              name='hourlyRate.currency'
               control={form.control}
               items={currencies.map((code) => ({ label: code, value: code }))}
               minWidth={130}
             />
           </Box>
           <FormSelectField
-            name="tracker.name"
+            name='tracker.name'
             control={form.control}
             items={trackerOptions}
             onChangeCb={(name) =>
@@ -117,22 +117,22 @@ function ClientForm({
 
         <br />
 
-        <Box sx={{ display: "flex", gap: 1 }}>
+        <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
-            type="submit"
-            variant="contained"
-            disabled={buttonStatus === "disabled"}
-            loading={buttonStatus === "loading"}
+            type='submit'
+            variant='contained'
+            disabled={buttonStatus === 'disabled'}
+            loading={buttonStatus === 'loading'}
           >
             {submitText}
           </Button>
           {otherButtons?.map((btn) => (
             <Button
               key={btn.label}
-              variant="outlined"
+              variant='outlined'
               onClick={btn.onClick}
-              disabled={buttonStatus === "disabled"}
-              loading={buttonStatus === "loading"}
+              disabled={buttonStatus === 'disabled'}
+              loading={buttonStatus === 'loading'}
             >
               {btn.label}
             </Button>

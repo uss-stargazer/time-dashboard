@@ -1,10 +1,10 @@
-import z from "zod";
-import type { ZodBaseClientData } from "../clients";
-import { sample1, sample2 } from "./samples";
-import clockify from "./clockify";
-import type { Tracker, ZodBaseComputedData } from "./definitions";
-import type { NonemptyArray } from "../util";
-import harvest from "./harvest";
+import z from 'zod';
+import type { ZodBaseClientData } from '../clients';
+import { sample1, sample2 } from './samples';
+import clockify from './clockify';
+import type { Tracker, ZodBaseComputedData } from './definitions';
+import type { NonemptyArray } from '../util';
+import harvest from './harvest';
 
 const trackers = {
   sample1,
@@ -30,7 +30,7 @@ export const trackerNames = Object.keys(trackers) as TrackerName[];
 // Discriminated unions for tracker data schemas
 const trackerDataDiscriminatees = trackerNames.map((name) =>
   z.object({
-    name: z.literal(name, "Invalid tracker name"),
+    name: z.literal(name, 'Invalid tracker name'),
     data: trackers[name].clientDataSchema,
     ...(trackers[name].computed && {
       computed: trackers[name].computed.dataSchema,
@@ -38,16 +38,16 @@ const trackerDataDiscriminatees = trackerNames.map((name) =>
   }),
 );
 export const TrackerUnion = z.discriminatedUnion(
-  "name",
+  'name',
   trackerDataDiscriminatees as NonemptyArray<
     (typeof trackerDataDiscriminatees)[number]
   >,
 );
 const uncomputedTrackerDataDiscriminatees = trackerDataDiscriminatees.map(
-  (d) => ("computed" in d.shape ? d.omit({ computed: true }) : d),
+  (d) => ('computed' in d.shape ? d.omit({ computed: true }) : d),
 );
 export const UncomputedTrackerUnion = z.discriminatedUnion(
-  "name",
+  'name',
   uncomputedTrackerDataDiscriminatees as NonemptyArray<
     (typeof uncomputedTrackerDataDiscriminatees)[number]
   >,

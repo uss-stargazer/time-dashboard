@@ -8,7 +8,7 @@ export const isUpperCase = (char: string): boolean =>
 export const camelCaseToTitle = (cc: string) =>
   [...cc].reduce(
     (title, c, idx) =>
-      (isUpperCase(c) ? title + " " : title) +
+      (isUpperCase(c) ? title + ' ' : title) +
       (idx === 0 ? c.toUpperCase() : c),
-    "",
+    '',
   );

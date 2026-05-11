@@ -8,23 +8,23 @@ import {
   Typography,
   type BoxProps,
   type SxProps,
-} from "@mui/material";
-import ExpectedVsActual from "./panels/ExpectedVsActual";
-import useClients from "../../hooks/useClients";
-import { Error as ErrorIcon, Info } from "@mui/icons-material";
-import Monthly from "./panels/Monthly";
-import React, { useEffect, useState } from "react";
+} from '@mui/material';
+import ExpectedVsActual from './panels/ExpectedVsActual';
+import useClients from '../../hooks/useClients';
+import { Error as ErrorIcon, Info } from '@mui/icons-material';
+import Monthly from './panels/Monthly';
+import React, { useEffect, useState } from 'react';
 import type {
   DashboardData,
   DashboardErrorType,
   DashboardPanelProps,
   ParsedClient,
-} from "./modules/definitions";
-import trackers from "../../modules/trackers";
-import Card from "../Card";
-import { Convert } from "easy-currencies";
-import { currencies, type Currency } from "../../modules/currencies";
-import useAsyncError from "../../hooks/useAsyncError";
+} from './modules/definitions';
+import trackers from '../../modules/trackers';
+import Card from '../Card';
+import { Convert } from 'easy-currencies';
+import { currencies, type Currency } from '../../modules/currencies';
+import useAsyncError from '../../hooks/useAsyncError';
 
 function DashboardPanel({
   name,
@@ -33,7 +33,7 @@ function DashboardPanel({
   moneyFormatter,
   Panel,
   ...props
-}: Omit<BoxProps, "children"> & {
+}: Omit<BoxProps, 'children'> & {
   name: string;
   data: DashboardData;
   universalCurrency: Currency;
@@ -46,24 +46,24 @@ function DashboardPanel({
     <Card
       label={name}
       sx={{
-        borderColor: "primary.main",
+        borderColor: 'primary.main',
         maxWidth: undefined,
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         gap: 1,
       }}
     >
       <Box
         {...props}
         sx={{
-          display: "flex",
+          display: 'flex',
           flexDirection: {
-            xs: "column",
-            sm: "column",
-            md: "row",
+            xs: 'column',
+            sm: 'column',
+            md: 'row',
           },
-          justifyContent: "center",
-          alignItems: "center",
+          justifyContent: 'center',
+          alignItems: 'center',
           gap: 1,
           ...props.sx,
         }}
@@ -86,16 +86,16 @@ function DashboardPanel({
       </Box>
 
       {error && (
-        <Card sx={{ maxWidth: undefined, borderColor: "error.main" }}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <ErrorIcon color="error" fontSize="small" />
-            <Typography color="error.main" variant="caption">
+        <Card sx={{ maxWidth: undefined, borderColor: 'error.main' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <ErrorIcon color='error' fontSize='small' />
+            <Typography color='error.main' variant='caption'>
               {error.tracker
-                ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ""}`
-                : "Some error"}
+                ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ''}`
+                : 'Some error'}
             </Typography>
           </Box>
-          <Typography variant="caption" m={1}>
+          <Typography variant='caption' m={1}>
             {error.message}
           </Typography>
         </Card>
@@ -108,14 +108,14 @@ const dashboardPanelComponents: {
   name: string;
   fc: React.FC<DashboardPanelProps>;
 }[] = [
-  { name: "Expected v. Actual", fc: ExpectedVsActual },
-  { name: "Monthly", fc: Monthly },
+  { name: 'Expected v. Actual', fc: ExpectedVsActual },
+  { name: 'Monthly', fc: Monthly },
 ];
 
 function Dashboard({ sx }: { sx?: SxProps }) {
   const throwError = useAsyncError();
   const { clients: allClients, isLoading } = useClients();
-  const [dashboardCurrency, setDashboardCurrency] = useState<Currency>("USD");
+  const [dashboardCurrency, setDashboardCurrency] = useState<Currency>('USD');
   const [clients, setClients] = useState<ParsedClient[]>([]);
 
   useEffect(() => {
@@ -146,10 +146,10 @@ function Dashboard({ sx }: { sx?: SxProps }) {
     return (
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          alignItems: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
           gap: 1,
           ...sx,
         }}
@@ -159,7 +159,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
         ) : (
           <>
             <Info />
-            <Typography textAlign="center">
+            <Typography textAlign='center'>
               Add a non-hidden client to view your time dashboard.
             </Typography>
           </>
@@ -172,21 +172,21 @@ function Dashboard({ sx }: { sx?: SxProps }) {
   };
 
   const moneyFormatter = new Intl.NumberFormat(undefined, {
-    style: "currency",
+    style: 'currency',
     currency: dashboardCurrency,
-    currencySign: "accounting",
+    currencySign: 'accounting',
   });
 
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         gap: 1,
         ...sx,
       }}
     >
-      <Box sx={{ display: "flex", justifyContent: "left " }}>
+      <Box sx={{ display: 'flex', justifyContent: 'left ' }}>
         <FormControl>
           <InputLabel>Currency</InputLabel>
           <Select
@@ -205,11 +205,11 @@ function Dashboard({ sx }: { sx?: SxProps }) {
 
       <Box
         sx={{
-          display: "flex",
-          flexWrap: "wrap",
-          alignItems: "flex-start",
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'flex-start',
           gap: 3,
-          justifyContent: { xs: "center", sm: "center", md: "flex-start" },
+          justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' },
         }}
       >
         {dashboardPanelComponents.map(({ name, fc }) => (

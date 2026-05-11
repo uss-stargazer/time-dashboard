@@ -1,9 +1,9 @@
-import { Box, Typography, type BoxProps } from "@mui/material";
-import Card from "../Card";
-import type { TrackerName } from "../../modules/trackers";
-import { createContext, useContext, useState } from "react";
-import { Error as ErrorIcon } from "@mui/icons-material";
-import trackers from "../../modules/trackers";
+import { Box, Typography, type BoxProps } from '@mui/material';
+import Card from '../Card';
+import type { TrackerName } from '../../modules/trackers';
+import { createContext, useContext, useState } from 'react';
+import { Error as ErrorIcon } from '@mui/icons-material';
+import trackers from '../../modules/trackers';
 
 export type DashboardError = {
   tracker?: TrackerName;
@@ -18,7 +18,7 @@ const DashboardErrorContext = createContext<ThrowDashboardError | null>(null);
 export const useDashboardError = (): ThrowDashboardError =>
   useContext(DashboardErrorContext) ??
   (() => {
-    throw new Error("useDashboardError must be within child of DashboardPane");
+    throw new Error('useDashboardError must be within child of DashboardPane');
   })();
 
 function DashboardPane({ children, ...props }: BoxProps) {
@@ -27,10 +27,10 @@ function DashboardPane({ children, ...props }: BoxProps) {
   return (
     <Card
       sx={{
-        borderColor: "primary.main",
+        borderColor: 'primary.main',
         maxWidth: undefined,
-        display: "flex",
-        flexDirection: "column",
+        display: 'flex',
+        flexDirection: 'column',
         gap: 1,
       }}
     >
@@ -50,14 +50,14 @@ function DashboardPane({ children, ...props }: BoxProps) {
         <Box
           {...props}
           sx={{
-            display: "flex",
+            display: 'flex',
             flexDirection: {
-              xs: "column",
-              sm: "column",
-              md: "row",
+              xs: 'column',
+              sm: 'column',
+              md: 'row',
             },
-            justifyContent: "center",
-            alignItems: "center",
+            justifyContent: 'center',
+            alignItems: 'center',
             gap: 1,
             ...props.sx,
           }}
@@ -67,16 +67,16 @@ function DashboardPane({ children, ...props }: BoxProps) {
       </DashboardErrorContext.Provider>
 
       {error && (
-        <Card sx={{ maxWidth: undefined, borderColor: "error.main" }}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <ErrorIcon color="error" fontSize="small" />
-            <Typography color="error.main" variant="caption">
+        <Card sx={{ maxWidth: undefined, borderColor: 'error.main' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <ErrorIcon color='error' fontSize='small' />
+            <Typography color='error.main' variant='caption'>
               {error.tracker
-                ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ""}`
-                : "Some error"}
+                ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ''}`
+                : 'Some error'}
             </Typography>
           </Box>
-          <Typography variant="caption" m={1}>
+          <Typography variant='caption' m={1}>
             {error.message}
           </Typography>
         </Card>

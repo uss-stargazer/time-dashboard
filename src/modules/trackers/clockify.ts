@@ -1,6 +1,6 @@
-import z from "zod";
-import type { Dayjs } from "dayjs";
-import { makeTracker, TrackerError } from "./definitions";
+import z from 'zod';
+import type { Dayjs } from 'dayjs';
+import { makeTracker, TrackerError } from './definitions';
 
 const SECONDS_PER_HOUR = 60 * 60;
 
@@ -21,10 +21,10 @@ const fetchClientId = async (
   );
   url.search = new URLSearchParams({ name: clientName }).toString();
   const response = await fetch(url, {
-    method: "GET",
+    method: 'GET',
     headers: {
-      "x-api-key": data.apiKey,
-      "Content-Type": "application/json",
+      'x-api-key': data.apiKey,
+      'Content-Type': 'application/json',
     },
     signal,
   });
@@ -51,28 +51,28 @@ const fetchTotalBillableHoursForClient = async (
   const response = await fetch(
     `https://reports.api.clockify.me/v1/workspaces/${data.workspaceId}/reports/summary`,
     {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "x-api-key": data.apiKey,
-        "Content-Type": "application/json",
+        'x-api-key': data.apiKey,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         dateRangeStart: from.toISOString(),
         dateRangeEnd: to.toISOString(),
-        dateRangeType: "ABSOLUTE",
+        dateRangeType: 'ABSOLUTE',
         clients: {
           ids: [data.clientId],
-          contains: "CONTAINS",
-          status: "ALL",
+          contains: 'CONTAINS',
+          status: 'ALL',
         },
         summaryFilter: {
-          groups: ["CLIENT"],
-          sortColumn: "GROUP",
+          groups: ['CLIENT'],
+          sortColumn: 'GROUP',
         },
-        amountShown: "EARNED",
-        amounts: ["EARNED"],
+        amountShown: 'EARNED',
+        amounts: ['EARNED'],
         billable: true,
-        exportType: "JSON",
+        exportType: 'JSON',
       }),
       signal,
     },
@@ -88,19 +88,19 @@ const fetchTotalBillableHoursForClient = async (
   const target = summary.totals[0];
   if (!target)
     console.warn(
-      "Clockify has no billable time data associated with this client in this time range; defaulting to 0.",
+      'Clockify has no billable time data associated with this client in this time range; defaulting to 0.',
     );
   return target ? target.totalBillableTime / SECONDS_PER_HOUR : 0;
 };
 
 const clockify = makeTracker({
-  prettyName: "Clockify",
+  prettyName: 'Clockify',
 
   clientDataSchema: z.object({
-    workspaceId: z.string().regex(/^[a-zA-Z\d]{24}$/, "Invalid workspace ID"),
-    apiKey: z.string().regex(/^[a-zA-Z\d]{48}$/, "Invalid API key"),
+    workspaceId: z.string().regex(/^[a-zA-Z\d]{24}$/, 'Invalid workspace ID'),
+    apiKey: z.string().regex(/^[a-zA-Z\d]{48}$/, 'Invalid API key'),
   }),
-  secretsDataKeys: ["apiKey"],
+  secretsDataKeys: ['apiKey'],
 
   computed: {
     dataSchema: z.object({ clientId: z.string().regex(/[a-zA-Z\d]+/) }),
@@ -108,7 +108,7 @@ const clockify = makeTracker({
       clientId: await fetchClientId(clientName, newClient, signal).catch(
         (error) => {
           throw new TrackerError(
-            "clockify",
+            'clockify',
             error instanceof Error ? error.message : JSON.stringify(error),
           );
         },
@@ -119,7 +119,7 @@ const clockify = makeTracker({
   async getBillableHours(from, to, { data, computed }, signal) {
     if (!computed)
       throw new TrackerError(
-        "clockify",
+        'clockify',
         "Clockify data was not computed; likely the app's error",
       );
     return await fetchTotalBillableHoursForClient(
@@ -129,7 +129,7 @@ const clockify = makeTracker({
       signal,
     ).catch((error) => {
       throw new TrackerError(
-        "clockify",
+        'clockify',
         error instanceof Error ? error.message : JSON.stringify(error),
       );
     });

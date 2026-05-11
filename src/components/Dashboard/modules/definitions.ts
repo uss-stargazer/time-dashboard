@@ -1,8 +1,8 @@
-import type { Currency } from "../../../modules/currencies";
-import type { Client } from "../../../modules/clients";
-import type { TrackerName } from "../../../modules/trackers";
+import type { Currency } from '../../../modules/currencies';
+import type { Client } from '../../../modules/clients';
+import type { TrackerName } from '../../../modules/trackers';
 
-export type ParsedClient = Omit<Client, "hourlyRate" | "isHidden"> & {
+export type ParsedClient = Omit<Client, 'hourlyRate' | 'isHidden'> & {
   hourlyRate: number;
 };
 

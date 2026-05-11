@@ -1,24 +1,24 @@
-import { DatePicker, LocalizationProvider } from "@mui/x-date-pickers";
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import dayjs, { Dayjs } from "dayjs";
-import { useEffect, useState } from "react";
-import trackers from "../../../modules/trackers";
-import { Box, Button, Typography, useTheme } from "@mui/material";
-import { BarChart } from "@mui/x-charts";
-import type { DashboardPanelProps } from "../modules/definitions";
-import { TrackerError } from "../../../modules/trackers/definitions";
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import dayjs, { Dayjs } from 'dayjs';
+import { useEffect, useState } from 'react';
+import trackers from '../../../modules/trackers';
+import { Box, Button, Typography, useTheme } from '@mui/material';
+import { BarChart } from '@mui/x-charts';
+import type { DashboardPanelProps } from '../modules/definitions';
+import { TrackerError } from '../../../modules/trackers/definitions';
 
 type ClientDataGroup = { clientName: string; hours: number; income: number };
 
 function Monthly({ data, error, money }: DashboardPanelProps) {
   const theme = useTheme();
-  const [month, setMonth] = useState<Dayjs>(() => dayjs().startOf("month"));
+  const [month, setMonth] = useState<Dayjs>(() => dayjs().startOf('month'));
   const [clientData, setClientData] = useState<ClientDataGroup[] | undefined>(
     undefined,
   );
 
   const today = dayjs();
-  let monthEnd = month.endOf("month");
+  let monthEnd = month.endOf('month');
   let monthInProgress = false;
   if (today.isBefore(monthEnd)) {
     monthEnd = today;
@@ -67,34 +67,34 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
         gap: 2,
       }}
     >
       <Box
         sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
           gap: 1,
         }}
       >
         <LocalizationProvider dateAdapter={AdapterDayjs}>
           <DatePicker
-            label="Month"
+            label='Month'
             value={month}
             onChange={(value, { validationError }) =>
               value && value.isValid() && !validationError && setMonth(value)
             }
-            views={["month", "year"]}
+            views={['month', 'year']}
             disableFuture
           />
         </LocalizationProvider>
         {monthInProgress && (
-          <Typography variant="caption">(Current month)</Typography>
+          <Typography variant='caption'>(Current month)</Typography>
         )}
       </Box>
 
@@ -104,46 +104,46 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
         <BarChart
           width={300}
           height={100 + 120 * data.clients.length}
-          sx={{ bgcolor: "background.paper" }}
-          layout="horizontal"
+          sx={{ bgcolor: 'background.paper' }}
+          layout='horizontal'
           dataset={clientData}
           yAxis={[
             {
-              dataKey: "clientName",
+              dataKey: 'clientName',
               tickLabelStyle: {
                 angle: -90,
-                textAnchor: "middle",
+                textAnchor: 'middle',
               },
             },
           ]}
           xAxis={[
             {
-              id: "hoursAxis",
-              dataKey: "hours",
-              position: "top",
-              label: "Hours",
+              id: 'hoursAxis',
+              dataKey: 'hours',
+              position: 'top',
+              label: 'Hours',
             },
             {
-              id: "incomeAxis",
-              dataKey: "income",
-              position: "bottom",
+              id: 'incomeAxis',
+              dataKey: 'income',
+              position: 'bottom',
               label: `Money (${money.currency})`,
             },
           ]}
           series={[
             {
-              dataKey: "hours",
-              label: "Hours",
+              dataKey: 'hours',
+              label: 'Hours',
               valueFormatter: (v) => (v === null ? null : `${v?.toFixed(2)}h`),
               color: theme.palette.primary.main,
-              xAxisId: "hoursAxis",
+              xAxisId: 'hoursAxis',
             },
             {
-              dataKey: "income",
-              label: "Income",
+              dataKey: 'income',
+              label: 'Income',
               valueFormatter: (v) => (v === null ? null : money.format(v)),
               color: theme.palette.success.main,
-              xAxisId: "incomeAxis",
+              xAxisId: 'incomeAxis',
             },
           ]}
         />

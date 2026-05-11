@@ -4,19 +4,19 @@ import {
   createTheme,
   ThemeProvider,
   Typography,
-} from "@mui/material";
-import { useEffect, useState, type PropsWithChildren } from "react";
-import Dashboard from "./components/Dashboard";
-import { ErrorBoundary } from "react-error-boundary";
-import ClientEditor from "./components/ClientEditor";
-import { ClientProvider } from "./hooks/useClients";
+} from '@mui/material';
+import { useEffect, useState, type PropsWithChildren } from 'react';
+import Dashboard from './components/Dashboard';
+import { ErrorBoundary } from 'react-error-boundary';
+import ClientEditor from './components/ClientEditor';
+import { ClientProvider } from './hooks/useClients';
 
 const theme = createTheme({
   palette: {
-    mode: "dark",
-    primary: { main: "#ef6c00" },
-    secondary: { main: "#42a5f5" },
-    background: { default: "#303030" },
+    mode: 'dark',
+    primary: { main: '#ef6c00' },
+    secondary: { main: '#42a5f5' },
+    background: { default: '#303030' },
   },
   typography: { fontFamily: "'Fira Mono', monospace" },
 });
@@ -26,35 +26,35 @@ function ErrorFallback({ error }: { error: unknown }) {
   return (
     <Box
       sx={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
         gap: 1,
       }}
     >
-      <Typography variant="h4" color="warning">
+      <Typography variant='h4' color='warning'>
         :[
       </Typography>
-      <Typography align="center" maxWidth="50%">
+      <Typography align='center' maxWidth='50%'>
         The right code in the wrong place can make all the difference in the
         world...
       </Typography>
 
       <Button
-        size="small"
-        color="error"
+        size='small'
+        color='error'
         onClick={() => setShowError(!showError)}
       >
-        {showError ? "Hide" : "Show"} error
+        {showError ? 'Hide' : 'Show'} error
       </Button>
       {showError && (
-        <Typography variant="caption" align="center" maxWidth="75%">
+        <Typography variant='caption' align='center' maxWidth='75%'>
           {error instanceof Error
             ? error.message
-            : JSON.stringify(error, undefined, "  ")}
+            : JSON.stringify(error, undefined, '  ')}
         </Typography>
       )}
     </Box>
@@ -71,34 +71,34 @@ function Splash({ children }: PropsWithChildren) {
     <Box>
       <Box
         sx={{
-          position: "absolute",
+          position: 'absolute',
           top: 0,
           left: 0,
           zIndex: 10000,
-          width: "100vw",
-          height: "100vh",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "center",
-          textAlign: "center",
-          bgcolor: "black",
+          width: '100vw',
+          height: '100vh',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          textAlign: 'center',
+          bgcolor: 'black',
           gap: 2,
           ...(hide && {
-            visibility: "hidden",
+            visibility: 'hidden',
             opacity: 0,
-            transition: "visibility 1s 0.5s, opacity 1s 0.5s linear",
+            transition: 'visibility 1s 0.5s, opacity 1s 0.5s linear',
           }),
         }}
       >
-        <Typography variant="h4" color="primary">
+        <Typography variant='h4' color='primary'>
           Time?
         </Typography>
         <Typography
           sx={
             hide && {
-              visibility: "hidden",
+              visibility: 'hidden',
               opacity: 0,
-              transition: "visibility 0s 1s, opacity 1s linear",
+              transition: 'visibility 0s 1s, opacity 1s linear',
             }
           }
         >
@@ -121,10 +121,10 @@ function App() {
           <ClientProvider>
             <Box
               sx={{
-                minHeight: "100vh",
-                width: "100vw",
-                display: "flex",
-                flexDirection: "column",
+                minHeight: '100vh',
+                width: '100vw',
+                display: 'flex',
+                flexDirection: 'column',
               }}
             >
               <Dashboard sx={{ flexGrow: 1, p: 2 }} />

@@ -1,10 +1,10 @@
-import type { Dayjs } from "dayjs";
-import { getExpectedHours } from "./time";
+import type { Dayjs } from 'dayjs';
+import { getExpectedHours } from './time';
 import type {
   ClientWithBillableHours,
   Money,
   ParsedClient,
-} from "./definitions";
+} from './definitions';
 
 type ExpectedValues = ReturnType<typeof getExpectedValues>;
 

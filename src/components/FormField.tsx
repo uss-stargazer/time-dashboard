@@ -5,16 +5,16 @@ import {
   MenuItem,
   Select,
   TextField,
-} from "@mui/material";
+} from '@mui/material';
 import {
   Controller,
   type Control,
   type FieldValues,
   type Path,
   type RegisterOptions,
-} from "react-hook-form";
-import { camelCaseToTitle } from "../modules/util";
-import NumberField from "./NumberField";
+} from 'react-hook-form';
+import { camelCaseToTitle } from '../modules/util';
+import NumberField from './NumberField';
 
 export type FormFieldProps<FormData extends FieldValues> = {
   type?: string;
@@ -43,7 +43,7 @@ export function FormTextField<FormData extends FieldValues>({
         fieldState: { error },
       }) => (
         <TextField
-          label={camelCaseToTitle(name.split(".").at(-1)!)}
+          label={camelCaseToTitle(name.split('.').at(-1)!)}
           type={type}
           value={value}
           placeholder={placeholder}
@@ -78,11 +78,11 @@ export function FormNumberField<FormData extends FieldValues>({
       }) => (
         <NumberField
           allowFloat
-          label={camelCaseToTitle(name.split(".").at(-1)!)}
+          label={camelCaseToTitle(name.split('.').at(-1)!)}
           value={value}
           onValueChange={(change) => {
             const value =
-              typeof change === "string" ? parseFloat(change) : change;
+              typeof change === 'string' ? parseFloat(change) : change;
             onChange(value);
             if (onChangeCb) onChangeCb(value);
           }}
@@ -110,7 +110,7 @@ export function FormSelectField<
   items: { label: string; value: ValueType }[];
   minWidth?: number;
 }) {
-  const label = camelCaseToTitle(name.split(".").at(-1)!);
+  const label = camelCaseToTitle(name.split('.').at(-1)!);
   return (
     <Controller
       rules={options}

@@ -1,15 +1,15 @@
-import z, { ZodError } from "zod";
-import { ClientSchema, type Client } from "../modules/clients";
+import z, { ZodError } from 'zod';
+import { ClientSchema, type Client } from '../modules/clients';
 import {
   createContext,
   useContext,
   useEffect,
   useState,
   type PropsWithChildren,
-} from "react";
-import { Box, Button, Typography } from "@mui/material";
-import trackers from "../modules/trackers";
-import ClientEditor from "../components/ClientEditor";
+} from 'react';
+import { Box, Button, Typography } from '@mui/material';
+import trackers from '../modules/trackers';
+import ClientEditor from '../components/ClientEditor';
 
 const ClientArraySchema = z.array(ClientSchema);
 
@@ -22,7 +22,7 @@ const ClientContext = createContext<ClientContextType | null>(null);
 
 export function ClientProvider({
   children,
-  storageKey = "clients",
+  storageKey = 'clients',
   defaultClients = [],
 }: PropsWithChildren<
   Partial<{
@@ -46,7 +46,7 @@ export function ClientProvider({
           const clients = ClientArraySchema.parse(JSON.parse(raw));
           if (new Set(clients.map((c) => c.name)).size !== clients.length)
             throw new SyntaxError(
-              "Invalid stored clients: has duplicate client names",
+              'Invalid stored clients: has duplicate client names',
             );
 
           Promise.all(
@@ -86,7 +86,7 @@ export function ClientProvider({
 
   useEffect(loadData, [storageKey]);
 
-  const setClientsWStorage: ClientContextType["setClients"] = (updated) => {
+  const setClientsWStorage: ClientContextType['setClients'] = (updated) => {
     localStorage.setItem(storageKey, JSON.stringify(updated));
     setClients(updated);
   };
@@ -94,19 +94,19 @@ export function ClientProvider({
   return error ? (
     <Box
       sx={{
-        width: "100vw",
-        height: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "center",
-        alignItems: "center",
+        width: '100vw',
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'center',
+        alignItems: 'center',
         gap: 1,
       }}
     >
       <Typography>Data stored locally is broken! :[</Typography>
       <Button
-        variant="outlined"
-        color="warning"
+        variant='outlined'
+        color='warning'
         onClick={() => {
           localStorage.removeItem(storageKey);
           loadData();
@@ -116,14 +116,14 @@ export function ClientProvider({
       </Button>
 
       <Button
-        size="small"
-        color="error"
+        size='small'
+        color='error'
         onClick={() => setShowError(!showError)}
       >
-        {showError ? "Hide" : "Show"} error
+        {showError ? 'Hide' : 'Show'} error
       </Button>
       {showError && (
-        <Typography variant="caption" align="center" maxWidth="75%">
+        <Typography variant='caption' align='center' maxWidth='75%'>
           {error}
         </Typography>
       )}
@@ -159,7 +159,7 @@ export function ClientProvider({
 const useClients = (): ClientContextType => {
   const clients = useContext(ClientContext);
   if (!clients)
-    throw new Error("useClients must be used with ClientProvider as parent");
+    throw new Error('useClients must be used with ClientProvider as parent');
   return clients;
 };
 

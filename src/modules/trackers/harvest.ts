@@ -1,6 +1,6 @@
-import z from "zod";
-import { makeTracker, TrackerError } from "./definitions";
-import type { Dayjs } from "dayjs";
+import z from 'zod';
+import { makeTracker, TrackerError } from './definitions';
+import type { Dayjs } from 'dayjs';
 
 const TimeReportResponseSchema = z.object({
   results: z.array(
@@ -20,14 +20,14 @@ const fetchUser = async (
   },
   signal?: AbortSignal,
 ): Promise<void> => {
-  const url = new URL("https://api.harvestapp.com/v2/users/me");
+  const url = new URL('https://api.harvestapp.com/v2/users/me');
   url.search = new URLSearchParams({
     access_token: data.accessToken,
     account_id: data.accountId,
   }).toString();
   const response = await fetch(url, {
     headers: {
-      "User-Agent": `${data.apiUserCompany} Integration (${data.apiUserEmail})`,
+      'User-Agent': `${data.apiUserCompany} Integration (${data.apiUserEmail})`,
     },
     signal,
   });
@@ -51,16 +51,16 @@ const fetchTotalBillableHoursForClient = async (
   },
   signal?: AbortSignal,
 ) => {
-  const url = new URL("https://api.harvestapp.com/v2/reports/time/clients");
+  const url = new URL('https://api.harvestapp.com/v2/reports/time/clients');
   url.search = new URLSearchParams({
-    from: from.format("YYYYMMDD"),
-    to: to.format("YYYYMMDD"),
+    from: from.format('YYYYMMDD'),
+    to: to.format('YYYYMMDD'),
   }).toString();
   const response = await fetch(url, {
     headers: {
-      "Harvest-Account-ID": data.accountId,
+      'Harvest-Account-ID': data.accountId,
       Authorization: `Bearer ${data.accessToken}`,
-      "User-Agent": `${data.apiUserCompany} Integration (${data.apiUserEmail})`,
+      'User-Agent': `${data.apiUserCompany} Integration (${data.apiUserEmail})`,
     },
     signal,
   });
@@ -79,26 +79,26 @@ const fetchTotalBillableHoursForClient = async (
   );
   if (!target)
     console.warn(
-      "Harvest has no time report available for client; defaulting to 0. THIS CLIENT MAY NOT EXIST!",
+      'Harvest has no time report available for client; defaulting to 0. THIS CLIENT MAY NOT EXIST!',
     );
   return target?.billable_hours ?? 0;
 };
 
 const harvest = makeTracker({
-  prettyName: "Harvest",
+  prettyName: 'Harvest',
 
   clientDataSchema: z.object({
     accountId: z
       .string()
-      .nonempty("Required")
-      .regex(/^\d+$/, "Invalid account ID"),
+      .nonempty('Required')
+      .regex(/^\d+$/, 'Invalid account ID'),
     accessToken: z
       .string()
-      .nonempty("Required")
-      .regex(/^\d+\.pt\.[a-zA-Z\d-_]+$/, "Invalid access token"),
+      .nonempty('Required')
+      .regex(/^\d+\.pt\.[a-zA-Z\d-_]+$/, 'Invalid access token'),
     apiUserEmail: z.email(),
   }),
-  secretsDataKeys: ["accessToken"],
+  secretsDataKeys: ['accessToken'],
 
   // Computed data is as necessary for Harvest however it allows
   // validation of auth info immediately after adding/updating.
@@ -114,7 +114,7 @@ const harvest = makeTracker({
         signal,
       ).catch((error) => {
         throw new TrackerError(
-          "harvest",
+          'harvest',
           error instanceof Error ? error.message : JSON.stringify(error),
         );
       });
@@ -125,7 +125,7 @@ const harvest = makeTracker({
   async getBillableHours(from, to, { clientName, data, computed }, signal) {
     if (!computed)
       throw new TrackerError(
-        "harvest",
+        'harvest',
         "Harvest data was not computed; likely the app's error",
       );
     return await fetchTotalBillableHoursForClient(
@@ -139,7 +139,7 @@ const harvest = makeTracker({
       signal,
     ).catch((error) => {
       throw new TrackerError(
-        "harvest",
+        'harvest',
         error instanceof Error ? error.message : JSON.stringify(error),
       );
     });

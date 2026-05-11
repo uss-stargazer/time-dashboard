@@ -1,7 +1,7 @@
-import type { Dayjs } from "dayjs";
-import type { TrackerName } from ".";
-import type { ClientName, ZodBaseClientData } from "../clients";
-import type z from "zod";
+import type { Dayjs } from 'dayjs';
+import type { TrackerName } from '.';
+import type { ClientName, ZodBaseClientData } from '../clients';
+import type z from 'zod';
 
 type GetBillableHours<ClientData> = (
   from: Dayjs,

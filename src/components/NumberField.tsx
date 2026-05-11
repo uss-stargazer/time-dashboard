@@ -1,7 +1,7 @@
 // From: https://github.com/mui/material-ui/issues/44284#issuecomment-2687922477
 
-import { type ChangeEvent, useEffect, useState } from "react";
-import TextField, { type TextFieldProps } from "@mui/material/TextField";
+import { type ChangeEvent, useEffect, useState } from 'react';
+import TextField, { type TextFieldProps } from '@mui/material/TextField';
 
 const positiveDigitsRegex = /^\d*$/g; // positive digits
 const signedDigitsRegex = /^-?\d*$/g; // negative/positive digits
@@ -62,11 +62,11 @@ export default function NumberField({
   }
 
   // NOTE - Format of "props.value" should be in sync with "allowNegative" and "allowFloat" flags, else field's content couldn't be edited unless cleared.
-  const [fieldValue, setFieldValue] = useState<string>((value || "") as string);
+  const [fieldValue, setFieldValue] = useState<string>((value || '') as string);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
-    setFieldValue((value || "") as string);
+    setFieldValue((value || '') as string);
   }, [value]);
 
   const handleChange = (
@@ -85,7 +85,7 @@ export default function NumberField({
 
     if (allowFloat && !Number.isNaN(decimalLimit)) {
       // check for the length of decimal digits
-      const [, decimals] = inputValue.split(".");
+      const [, decimals] = inputValue.split('.');
 
       if (decimals?.length > decimalLimit) return;
     }
@@ -94,7 +94,7 @@ export default function NumberField({
 
     // check for required field error
     const fieldErrors =
-      props.required && !inputValue ? ["Value is required"] : [];
+      props.required && !inputValue ? ['Value is required'] : [];
 
     if (onValueChange) onValueChange(inputValue, fieldErrors, name);
     if (props.onChange) props.onChange(e);
@@ -103,13 +103,13 @@ export default function NumberField({
   return (
     <TextField
       {...props}
-      type="text" // if we use "number", we need to take care of formatting and handle onWheel, onTouchStart and onTouchMove events
+      type='text' // if we use "number", we need to take care of formatting and handle onWheel, onTouchStart and onTouchMove events
       value={fieldValue}
       onChange={handleChange}
       InputProps={{
         ...InputProps,
         inputProps: {
-          inputMode: "numeric",
+          inputMode: 'numeric',
           pattern: validationRegex.source,
           ...InputProps?.inputProps,
           ...inputProps,

@@ -1,5 +1,5 @@
-import { Box, Typography, type BoxProps } from "@mui/material";
-import type { PropsWithChildren } from "react";
+import { Box, Typography, type BoxProps } from '@mui/material';
+import type { PropsWithChildren } from 'react';
 
 function Card({
   children,
@@ -14,24 +14,24 @@ function Card({
     <Box
       {...props}
       sx={{
-        p: "1rem",
-        maxWidth: "25em",
-        width: fullWidth ? "25em" : undefined,
-        border: "1px solid",
-        borderColor: "primary.dark",
-        borderRadius: "7px",
-        bgcolor: faded ? "background.main" : "grey.900",
-        position: "relative",
-        mt: label && "14px",
+        p: '1rem',
+        maxWidth: '25em',
+        width: fullWidth ? '25em' : undefined,
+        border: '1px solid',
+        borderColor: 'primary.dark',
+        borderRadius: '7px',
+        bgcolor: faded ? 'background.main' : 'grey.900',
+        position: 'relative',
+        mt: label && '14px',
         ...props.sx,
       }}
     >
       {label && (
         <Typography
-          variant="caption"
-          color="primary"
+          variant='caption'
+          color='primary'
           sx={{
-            position: "absolute",
+            position: 'absolute',
             fontSize: 12,
             top: -18,
             left: 12,

@@ -6,15 +6,15 @@ import {
   styled,
   SwipeableDrawer,
   Typography,
-} from "@mui/material";
-import useClients from "../hooks/useClients";
-import { useState, type Ref } from "react";
-import type { Client } from "../modules/clients";
-import ClientForm from "./ClientForm";
-import { Add, Error as ErrorIcon, Settings } from "@mui/icons-material";
-import Card from "./Card";
-import { grey } from "@mui/material/colors";
-import trackers from "../modules/trackers";
+} from '@mui/material';
+import useClients from '../hooks/useClients';
+import { useState, type Ref } from 'react';
+import type { Client } from '../modules/clients';
+import ClientForm from './ClientForm';
+import { Add, Error as ErrorIcon, Settings } from '@mui/icons-material';
+import Card from './Card';
+import { grey } from '@mui/material/colors';
+import trackers from '../modules/trackers';
 
 function Editor() {
   const clientData = useClients();
@@ -27,14 +27,14 @@ function Editor() {
     message: string;
   } | null>(null);
 
-  if (clientData.isLoading) return <Button loading variant="outlined" />;
+  if (clientData.isLoading) return <Button loading variant='outlined' />;
 
   // Functions for editing clients
 
   const clientNames = clientData.clients.map((c) => c.name);
   const addClient = (client: Client, cb?: () => void) => {
     if (clientNames.includes(client.name))
-      throw new Error("Add client: client name must be unique");
+      throw new Error('Add client: client name must be unique');
     const tracker = trackers[client.tracker.name];
 
     setLoadingClient(client.name);
@@ -74,9 +74,9 @@ function Editor() {
   };
   const updateClient = (ogName: string, updated: Client, cb?: () => void) => {
     const ogClient = clientData.clients.find((c) => c.name == ogName);
-    if (!ogClient) throw new Error("Update client: client does not exist");
+    if (!ogClient) throw new Error('Update client: client does not exist');
     if (ogName !== updateClient.name && clientNames.includes(updateClient.name))
-      throw new Error("Update client: new client name must be unique");
+      throw new Error('Update client: new client name must be unique');
     const filteredClients = clientData.clients.filter((c) => c !== ogClient);
 
     setLoadingClient(ogName);
@@ -111,16 +111,16 @@ function Editor() {
   };
 
   return (
-    <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       {error && (
-        <Card sx={{ maxWidth: undefined, borderColor: "error.main" }}>
-          <Box sx={{ display: "flex", gap: 1 }}>
-            <ErrorIcon color="error" fontSize="small" />
-            <Typography color="error.main" variant="caption">
+        <Card sx={{ maxWidth: undefined, borderColor: 'error.main' }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <ErrorIcon color='error' fontSize='small' />
+            <Typography color='error.main' variant='caption'>
               {`Tracker didn't like client ${error.client} `}
             </Typography>
           </Box>
-          <Typography variant="caption" m={1}>
+          <Typography variant='caption' m={1}>
             {error.message}
           </Typography>
         </Card>
@@ -128,8 +128,8 @@ function Editor() {
 
       <Box
         sx={{
-          display: "flex",
-          flexWrap: "wrap",
+          display: 'flex',
+          flexWrap: 'wrap',
           gap: 2,
         }}
       >
@@ -139,13 +139,13 @@ function Editor() {
               key={client.name}
               client={client}
               invalidNames={clientNames.filter((c) => c !== client.name)}
-              submitText="Update"
+              submitText='Update'
               onSubmit={(updated) => updateClient(client.name, updated)}
               isHidden={client.isHidden}
               otherButtons={[
-                { label: "Remove", onClick: () => removeClient(client.name) },
+                { label: 'Remove', onClick: () => removeClient(client.name) },
                 {
-                  label: client.isHidden ? "Unhide" : "Hide",
+                  label: client.isHidden ? 'Unhide' : 'Hide',
                   onClick: () =>
                     updateClient(client.name, {
                       ...client,
@@ -156,34 +156,34 @@ function Editor() {
               buttonStatus={
                 loadingClient
                   ? loadingClient === client.name
-                    ? "loading"
-                    : "disabled"
-                  : "normal"
+                    ? 'loading'
+                    : 'disabled'
+                  : 'normal'
               }
             />
           )),
           stagedClient ? (
             <ClientForm
-              key="staged"
+              key='staged'
               client={stagedClient}
               invalidNames={clientNames}
-              submitText="Add"
+              submitText='Add'
               onSubmit={(client) =>
                 addClient(client, () => setStagedClient(null))
               }
               otherButtons={[
-                { label: "Cancel", onClick: () => setStagedClient(null) },
+                { label: 'Cancel', onClick: () => setStagedClient(null) },
               ]}
               buttonStatus={
                 loadingClient
                   ? loadingClient === stagedClient.name
-                    ? "loading"
-                    : "disabled"
-                  : "normal"
+                    ? 'loading'
+                    : 'disabled'
+                  : 'normal'
               }
             />
           ) : (
-            <Card key="add" fullWidth sx={{ display: "flex" }}>
+            <Card key='add' fullWidth sx={{ display: 'flex' }}>
               <Button sx={{ flexGrow: 1 }} onClick={() => setStagedClient({})}>
                 <Add />
               </Button>
@@ -196,15 +196,15 @@ function Editor() {
 }
 
 const drawerBleeding = 60;
-const Puller = styled("div")(() => ({
+const Puller = styled('div')(() => ({
   width: 30,
   height: 6,
-  position: "absolute",
+  position: 'absolute',
   top: 8,
-  left: "calc(50% - 15px)",
+  left: 'calc(50% - 15px)',
   backgroundColor: grey[500],
   borderRadius: 3,
-  cursor: "pointer",
+  cursor: 'pointer',
 }));
 
 function ClientEditor({
@@ -220,15 +220,15 @@ function ClientEditor({
     <>
       <GlobalStyles
         styles={{
-          ".MuiDrawer-root > .MuiPaper-root": {
+          '.MuiDrawer-root > .MuiPaper-root': {
             height: `calc(70% - ${drawerBleeding}px)`,
-            overflow: "visible",
+            overflow: 'visible',
           },
         }}
       />
       <Box onClick={() => isOpen || setIsOpen(true)}>
         <SwipeableDrawer
-          anchor="bottom"
+          anchor='bottom'
           open={isOpen}
           onClose={() => setIsOpen(false)}
           onOpen={() => setIsOpen(true)}
@@ -238,34 +238,34 @@ function ClientEditor({
         >
           <AppBar
             sx={{
-              position: "absolute",
+              position: 'absolute',
               top: -drawerBleeding,
               borderTopLeftRadius: 8,
               borderTopRightRadius: 8,
-              visibility: "visible",
+              visibility: 'visible',
               right: 0,
               left: 0,
               height: `${drawerBleeding}px`,
-              bgcolor: "primary.dark",
+              bgcolor: 'primary.dark',
             }}
           >
             <Puller />
             <Box
               sx={{
-                height: "100%",
-                width: "100%",
+                height: '100%',
+                width: '100%',
                 mt: 0.5,
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-                gap: "0.5rem",
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '0.5rem',
               }}
             >
               <Settings />
               <Typography>Edit clients</Typography>
             </Box>
           </AppBar>
-          <Box sx={{ p: 2, height: "100%", overflow: "auto" }} ref={ref}>
+          <Box sx={{ p: 2, height: '100%', overflow: 'auto' }} ref={ref}>
             <Editor />
           </Box>
         </SwipeableDrawer>
