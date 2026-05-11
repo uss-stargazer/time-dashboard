@@ -18,15 +18,14 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
   );
 
   const today = dayjs();
-  let monthEnd = month.endOf('month');
-  let monthInProgress = false;
-  if (today.isBefore(monthEnd)) {
-    monthEnd = today;
-    monthInProgress = true;
-  }
+  const fullMonthEnd = month.endOf("month");
+  const monthInProgress = today.isBefore(fullMonthEnd);
 
   useEffect(() => {
     const controller = new AbortController();
+    const monthEnd = dayjs().isBefore(month.endOf("month"))
+      ? dayjs()
+      : month.endOf("month");
 
     Promise.all(
       data.clients.map((client) =>
@@ -62,7 +61,7 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
       });
 
     return () => controller.abort();
-  }, [data.clients, month, error, monthEnd]);
+  }, [data.clients, month, error]);
 
   return (
     <Box

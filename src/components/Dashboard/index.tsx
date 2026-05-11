@@ -13,7 +13,7 @@ import ExpectedVsActual from './panels/ExpectedVsActual';
 import useClients from '../../hooks/useClients';
 import { Error as ErrorIcon, Info } from '@mui/icons-material';
 import Monthly from './panels/Monthly';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type {
   DashboardData,
   DashboardErrorType,
@@ -41,6 +41,21 @@ function DashboardPanel({
   Panel: React.FC<DashboardPanelProps>;
 }) {
   const [error, setError] = useState<DashboardErrorType | undefined>(undefined);
+
+  const errorHandlers = useMemo(
+    () => ({
+      throw: (error: unknown) =>
+        setError(
+          error instanceof Error
+            ? { ...error, message: error.message }
+            : {
+              message: JSON.stringify(error),
+            },
+        ),
+      reset: () => setError(undefined),
+    }),
+    [],
+  );
 
   return (
     <Card
@@ -71,17 +86,7 @@ function DashboardPanel({
         <Panel
           data={data}
           money={{ currency: universalCurrency, format: moneyFormatter.format }}
-          error={{
-            throw: (error) =>
-              setError(
-                error instanceof Error
-                  ? { ...error, message: error.message }
-                  : {
-                      message: JSON.stringify(error),
-                    },
-              ),
-            reset: () => setError(undefined),
-          }}
+          error={errorHandlers}
         />
       </Box>
 
@@ -108,9 +113,9 @@ const dashboardPanelComponents: {
   name: string;
   fc: React.FC<DashboardPanelProps>;
 }[] = [
-  { name: 'Expected v. Actual', fc: ExpectedVsActual },
-  { name: 'Monthly', fc: Monthly },
-];
+    { name: 'Expected v. Actual', fc: ExpectedVsActual },
+    { name: 'Monthly', fc: Monthly },
+  ];
 
 function Dashboard({ sx }: { sx?: SxProps }) {
   const throwError = useAsyncError();
@@ -129,8 +134,8 @@ function Dashboard({ sx }: { sx?: SxProps }) {
               c.hourlyRate.currency === dashboardCurrency
                 ? c.hourlyRate.amount
                 : await Convert(c.hourlyRate.amount)
-                    .from(c.hourlyRate.currency)
-                    .to(dashboardCurrency),
+                  .from(c.hourlyRate.currency)
+                  .to(dashboardCurrency),
           }))().catch((error) => {
             throwError(
               error,
