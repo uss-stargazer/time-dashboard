@@ -10,7 +10,7 @@ import {
   type SxProps,
 } from '@mui/material';
 import ExpectedVsActual from './panels/ExpectedVsActual';
-import useClients from '../../hooks/useClients';
+import useSettings from '../../hooks/useSettings';
 import { Error as ErrorIcon, Info } from '@mui/icons-material';
 import Monthly from './panels/Monthly';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -49,8 +49,8 @@ function DashboardPanel({
           error instanceof Error
             ? { ...error, message: error.message }
             : {
-              message: JSON.stringify(error),
-            },
+                message: JSON.stringify(error),
+              },
         ),
       reset: () => setError(undefined),
     }),
@@ -113,19 +113,19 @@ const dashboardPanelComponents: {
   name: string;
   fc: React.FC<DashboardPanelProps>;
 }[] = [
-    { name: 'Expected v. Actual', fc: ExpectedVsActual },
-    { name: 'Monthly', fc: Monthly },
-  ];
+  { name: 'Expected v. Actual', fc: ExpectedVsActual },
+  { name: 'Monthly', fc: Monthly },
+];
 
 function Dashboard({ sx }: { sx?: SxProps }) {
   const throwError = useAsyncError();
-  const { clients: allClients, isLoading } = useClients();
+  const settings = useSettings();
   const [dashboardCurrency, setDashboardCurrency] = useState<Currency>('USD');
   const [clients, setClients] = useState<ParsedClient[]>([]);
 
   useEffect(() => {
     Promise.all(
-      allClients
+      settings.clients
         .filter((c) => !c.isHidden)
         .map((c) =>
           (async () => ({
@@ -134,8 +134,8 @@ function Dashboard({ sx }: { sx?: SxProps }) {
               c.hourlyRate.currency === dashboardCurrency
                 ? c.hourlyRate.amount
                 : await Convert(c.hourlyRate.amount)
-                  .from(c.hourlyRate.currency)
-                  .to(dashboardCurrency),
+                    .from(c.hourlyRate.currency)
+                    .to(dashboardCurrency),
           }))().catch((error) => {
             throwError(
               error,
@@ -145,9 +145,9 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           }),
         ),
     ).then((parsedClients) => setClients(parsedClients));
-  }, [allClients, dashboardCurrency, throwError]);
+  }, [settings.clients, dashboardCurrency, throwError]);
 
-  if (isLoading || clients.length === 0)
+  if (settings.isLoading || clients.length === 0)
     return (
       <Box
         sx={{
@@ -159,7 +159,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           ...sx,
         }}
       >
-        {isLoading ? (
+        {settings.isLoading ? (
           <Button loading />
         ) : (
           <>

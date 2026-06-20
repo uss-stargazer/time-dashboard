@@ -7,7 +7,7 @@ import {
   SwipeableDrawer,
   Typography,
 } from '@mui/material';
-import useClients from '../hooks/useClients';
+import useSettings from '../hooks/useSettings';
 import { useState, type Ref } from 'react';
 import type { Client } from '../modules/clients';
 import ClientForm from './ClientForm';
@@ -17,7 +17,7 @@ import { grey } from '@mui/material/colors';
 import trackers from '../modules/trackers';
 
 function Editor() {
-  const clientData = useClients();
+  const settings = useSettings();
   const [stagedClient, setStagedClient] = useState<Partial<Client> | null>(
     null,
   );
@@ -27,11 +27,11 @@ function Editor() {
     message: string;
   } | null>(null);
 
-  if (clientData.isLoading) return <Button loading variant='outlined' />;
+  if (settings.isLoading) return <Button loading variant='outlined' />;
 
   // Functions for editing clients
 
-  const clientNames = clientData.clients.map((c) => c.name);
+  const clientNames = settings.clients.map((c) => c.name);
   const addClient = (client: Client, cb?: () => void) => {
     if (clientNames.includes(client.name))
       throw new Error('Add client: client name must be unique');
@@ -59,25 +59,25 @@ function Editor() {
         throw error;
       })
       .then((client) => {
-        clientData.setClients([...clientData.clients, client]);
+        settings.setClients([...settings.clients, client]);
         setError(null);
         if (cb) cb();
       })
       .finally(() => setLoadingClient(null));
   };
   const removeClient = (clientName: string) => {
-    if (clientData.clients.some((c) => c.name === clientName))
-      clientData.setClients(
-        clientData.clients.filter((c) => c.name !== clientName),
+    if (settings.clients.some((c) => c.name === clientName))
+      settings.setClients(
+        settings.clients.filter((c) => c.name !== clientName),
       );
     if (clientName === error?.client) setError(null);
   };
   const updateClient = (ogName: string, updated: Client, cb?: () => void) => {
-    const ogClient = clientData.clients.find((c) => c.name == ogName);
+    const ogClient = settings.clients.find((c) => c.name == ogName);
     if (!ogClient) throw new Error('Update client: client does not exist');
     if (ogName !== updateClient.name && clientNames.includes(updateClient.name))
       throw new Error('Update client: new client name must be unique');
-    const filteredClients = clientData.clients.filter((c) => c !== ogClient);
+    const filteredClients = settings.clients.filter((c) => c !== ogClient);
 
     setLoadingClient(ogName);
 
@@ -103,7 +103,7 @@ function Editor() {
         throw error;
       })
       .then((client) => {
-        clientData.setClients([...filteredClients, client]);
+        settings.setClients([...filteredClients, client]);
         setError(null);
         if (cb) cb();
       })
@@ -134,7 +134,7 @@ function Editor() {
         }}
       >
         {[
-          ...clientData.clients.map((client) => (
+          ...settings.clients.map((client) => (
             <ClientForm
               key={client.name}
               client={client}

@@ -9,7 +9,7 @@ import { useEffect, useState, type PropsWithChildren } from 'react';
 import Dashboard from './components/Dashboard';
 import { ErrorBoundary } from 'react-error-boundary';
 import ClientEditor from './components/ClientEditor';
-import { ClientProvider } from './hooks/useClients';
+import { SettingsProvider } from './hooks/useSettings';
 
 const theme = createTheme({
   palette: {
@@ -118,7 +118,7 @@ function App() {
     <ThemeProvider theme={theme}>
       <Splash>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
-          <ClientProvider>
+          <SettingsProvider>
             <Box
               sx={{
                 minHeight: '100vh',
@@ -133,7 +133,7 @@ function App() {
                 setIsOpen={setEditClientsOpen}
               />
             </Box>
-          </ClientProvider>
+          </SettingsProvider>
         </ErrorBoundary>
       </Splash>
     </ThemeProvider>

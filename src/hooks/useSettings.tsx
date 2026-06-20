@@ -13,14 +13,14 @@ import ClientEditor from '../components/ClientEditor';
 
 const ClientArraySchema = z.array(ClientSchema);
 
-type ClientContextType = {
+type SettingsContextType = {
   isLoading: boolean;
   clients: Client[];
   setClients: (updated: Client[]) => void;
 };
-const ClientContext = createContext<ClientContextType | null>(null);
+const SettingsContext = createContext<SettingsContextType | null>(null);
 
-export function ClientProvider({
+export function SettingsProvider({
   children,
   storageKey = 'clients',
   defaultClients = [],
@@ -86,7 +86,7 @@ export function ClientProvider({
 
   useEffect(loadData, [storageKey]);
 
-  const setClientsWStorage: ClientContextType['setClients'] = (updated) => {
+  const setClientsWStorage: SettingsContextType['setClients'] = (updated) => {
     localStorage.setItem(storageKey, JSON.stringify(updated));
     setClients(updated);
   };
@@ -128,7 +128,7 @@ export function ClientProvider({
         </Typography>
       )}
 
-      <ClientContext.Provider
+      <SettingsContext.Provider
         value={{
           isLoading,
           clients,
@@ -141,10 +141,10 @@ export function ClientProvider({
             setIsOpen={setClientEditorOpen}
           />
         )}
-      </ClientContext.Provider>
+      </SettingsContext.Provider>
     </Box>
   ) : (
-    <ClientContext.Provider
+    <SettingsContext.Provider
       value={{
         isLoading,
         clients,
@@ -152,15 +152,15 @@ export function ClientProvider({
       }}
     >
       {children}
-    </ClientContext.Provider>
+    </SettingsContext.Provider>
   );
 }
 
-const useClients = (): ClientContextType => {
-  const clients = useContext(ClientContext);
-  if (!clients)
-    throw new Error('useClients must be used with ClientProvider as parent');
-  return clients;
+const useSettings = (): SettingsContextType => {
+  const settings = useContext(SettingsContext);
+  if (!settings)
+    throw new Error('useSettings must be used with SettingsProvider as parent');
+  return settings;
 };
 
-export default useClients;
+export default useSettings;
