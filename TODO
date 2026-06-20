@@ -1,7 +1,25 @@
-- Fix ts intersection for data when calling functions
-- Form control errors and undefined stuff in clientform
-- Save dashboard currency in local storage
-  - Possible cache conersion rates for offline access (although the app is kinda uselss if ur offline)
-- Handling offline errors
-  - Displays local storage error if cannot fetch computeddata
-- (maybe) refactor in the future where projects are the unit instead of clients
+- startDate and endDate in REBASE!!!!!
+- general
+  - Fix ts intersection for data when calling functions
+  - Form control errors and undefined stuff in clientform
+  - Handling offline errors
+    - Displays local storage error if cannot fetch computeddata
+  - (maybe) refactor in the future where projects are the unit instead of clients
+  - password protected?
+- feature/unified-dashboard
+  - unify all the dahsboard for the same date range
+  - small icon in corner for dashboard settings (real estate)
+  - settings: time range, currency, clients
+- feature/date-range
+  - better date range presets
+  - options
+    - month to date
+    - this week (start monday)
+    - this month
+    - week to date (start monday)
+    - last 30 days
+    - this year
+    - year to date
+    - custom
+- feature/react-query
+  - use react query 
