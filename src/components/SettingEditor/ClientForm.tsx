@@ -1,16 +1,23 @@
 import {
   UncomputedClientSchema,
   type UncomputedClient,
-} from '../modules/clients';
-import trackers, { trackerNames, type TrackerName } from '../modules/trackers';
+} from '../../modules/clients';
+import trackers, {
+  trackerNames,
+  type TrackerName,
+} from '../../modules/trackers';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { KeyOfUnion } from '../modules/util';
+import type { KeyOfUnion } from '../../modules/util';
 import { Box, Button } from '@mui/material';
-import { FormNumberField, FormSelectField, FormTextField } from './FormField';
-import Card from './Card';
-import { currencies } from '../modules/currencies';
+import {
+  FormNumberField,
+  FormSelectField,
+  FormTextField,
+} from './../FormField';
+import Card from './../Card';
+import { currencies } from '../../modules/currencies';
 
 function ClientDataForm({ trackerName }: { trackerName: TrackerName }) {
   const form = useFormContext<UncomputedClient>();

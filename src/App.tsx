@@ -8,8 +8,8 @@ import {
 import { useEffect, useState, type PropsWithChildren } from 'react';
 import Dashboard from './components/Dashboard';
 import { ErrorBoundary } from 'react-error-boundary';
-import ClientEditor from './components/ClientEditor';
 import { SettingsProvider } from './hooks/useSettings';
+import SettingsEditor from './components/SettingEditor';
 
 const theme = createTheme({
   palette: {
@@ -112,8 +112,6 @@ function Splash({ children }: PropsWithChildren) {
 }
 
 function App() {
-  const [editClientsOpen, setEditClientsOpen] = useState<boolean>(false);
-
   return (
     <ThemeProvider theme={theme}>
       <Splash>
@@ -128,10 +126,7 @@ function App() {
               }}
             >
               <Dashboard sx={{ flexGrow: 1, p: 2 }} />
-              <ClientEditor
-                isOpen={editClientsOpen}
-                setIsOpen={setEditClientsOpen}
-              />
+              <SettingsEditor />
             </Box>
           </SettingsProvider>
         </ErrorBoundary>

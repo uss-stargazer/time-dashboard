@@ -9,7 +9,7 @@ import {
 } from 'react';
 import { Box, Button, Typography } from '@mui/material';
 import trackers from '../modules/trackers';
-import ClientEditor from '../components/ClientEditor';
+import SettingsEditor from '../components/SettingEditor';
 
 const ClientArraySchema = z.array(ClientSchema);
 
@@ -34,7 +34,6 @@ export function SettingsProvider({
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState<boolean>(false);
   const [clients, setClients] = useState<Client[]>(defaultClients);
-  const [clientEditorOpen, setClientEditorOpen] = useState<boolean>(false);
 
   const loadData = () => {
     setError(null);
@@ -135,12 +134,7 @@ export function SettingsProvider({
           setClients: setClientsWStorage,
         }}
       >
-        {clients.length > 0 && (
-          <ClientEditor
-            isOpen={clientEditorOpen}
-            setIsOpen={setClientEditorOpen}
-          />
-        )}
+        {clients.length > 0 && <SettingsEditor />}
       </SettingsContext.Provider>
     </Box>
   ) : (

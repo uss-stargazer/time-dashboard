@@ -1,22 +1,13 @@
-import {
-  AppBar,
-  Box,
-  Button,
-  GlobalStyles,
-  styled,
-  SwipeableDrawer,
-  Typography,
-} from '@mui/material';
-import useSettings from '../hooks/useSettings';
-import { useState, type Ref } from 'react';
-import type { Client } from '../modules/clients';
+import { useState } from 'react';
+import { Add, Error as ErrorIcon } from '@mui/icons-material';
+import useSettings from '../../hooks/useSettings';
+import type { Client } from '../../modules/clients';
+import trackers from '../../modules/trackers';
+import { Box, Button, Typography } from '@mui/material';
+import Card from '../Card';
 import ClientForm from './ClientForm';
-import { Add, Error as ErrorIcon, Settings } from '@mui/icons-material';
-import Card from './Card';
-import { grey } from '@mui/material/colors';
-import trackers from '../modules/trackers';
 
-function Editor() {
+function ClientEditor() {
   const settings = useSettings();
   const [stagedClient, setStagedClient] = useState<Partial<Client> | null>(
     null,
@@ -26,8 +17,6 @@ function Editor() {
     client: string;
     message: string;
   } | null>(null);
-
-  if (settings.isLoading) return <Button loading variant='outlined' />;
 
   // Functions for editing clients
 
@@ -192,88 +181,6 @@ function Editor() {
         ]}
       </Box>
     </Box>
-  );
-}
-
-const drawerBleeding = 60;
-const Puller = styled('div')(() => ({
-  width: 30,
-  height: 6,
-  position: 'absolute',
-  top: 8,
-  left: 'calc(50% - 15px)',
-  backgroundColor: grey[500],
-  borderRadius: 3,
-  cursor: 'pointer',
-}));
-
-function ClientEditor({
-  isOpen,
-  setIsOpen,
-  ref,
-}: {
-  isOpen: boolean;
-  setIsOpen: (isOpen: boolean) => void;
-  ref?: Ref<HTMLDivElement>;
-}) {
-  return (
-    <>
-      <GlobalStyles
-        styles={{
-          '.MuiDrawer-root > .MuiPaper-root': {
-            height: `calc(70% - ${drawerBleeding}px)`,
-            overflow: 'visible',
-          },
-        }}
-      />
-      <Box onClick={() => isOpen || setIsOpen(true)}>
-        <SwipeableDrawer
-          anchor='bottom'
-          open={isOpen}
-          onClose={() => setIsOpen(false)}
-          onOpen={() => setIsOpen(true)}
-          swipeAreaWidth={drawerBleeding}
-          disableSwipeToOpen={false}
-          keepMounted
-        >
-          <AppBar
-            sx={{
-              position: 'absolute',
-              top: -drawerBleeding,
-              borderTopLeftRadius: 8,
-              borderTopRightRadius: 8,
-              visibility: 'visible',
-              right: 0,
-              left: 0,
-              height: `${drawerBleeding}px`,
-              bgcolor: 'primary.dark',
-            }}
-          >
-            <Puller />
-            <Box
-              sx={{
-                height: '100%',
-                width: '100%',
-                mt: 0.5,
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                gap: '0.5rem',
-              }}
-            >
-              <Settings />
-              <Typography>Edit clients</Typography>
-            </Box>
-          </AppBar>
-          <Box sx={{ p: 2, height: '100%', overflow: 'auto' }} ref={ref}>
-            <Editor />
-          </Box>
-        </SwipeableDrawer>
-
-        {/* Empty box to make sure no elements can hide behind the drawer bar */}
-        <Box sx={{ height: `${drawerBleeding}px` }} />
-      </Box>
-    </>
   );
 }
 
