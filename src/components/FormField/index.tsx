@@ -13,7 +13,7 @@ import {
   type Path,
   type RegisterOptions,
 } from 'react-hook-form';
-import { camelCaseToTitle } from '../modules/util';
+import { camelCaseToTitle } from '../../modules/util';
 import NumberField from './NumberField';
 
 export type FormFieldProps<FormData extends FieldValues> = {

@@ -25,16 +25,6 @@ export type NumberFieldProps = TextFieldProps & {
 /**
  * ### NumberField ###
  * Allows signed/unsigned numeric/floating digits entry
- *
- * NOTE - Format of "props.value" should be in sync with "allowNegative" and "allowFloat" flags, else field's content couldn't be edited unless cleared.
- * @param {function} onValueChange Receives changed value of input field.
- * @param {boolean} allowNegative Enables input to take negative entry.
- * @param {boolean} allowFloat Enables input to take floating entry.
- * @param {number} maxValue Maximum allowed numeric/floating signed value.
- * @param {number} minValue Minimum allowed numeric/floating signed value.
- * Note - Input won't register entry if entered value is less than minValue.
- * @param {number} decimalLimit Number of allowed decimal digits.
- * @param {object} ... All parameters same as a TextField component.
  */
 export default function NumberField({
   value,
