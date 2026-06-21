@@ -10,6 +10,8 @@
   - unify all the dahsboard for the same date range
   - small icon in corner for dashboard settings (real estate)
   - settings: time range, currency, clients
+  - montly  -> comparison
+    - don't if just one client (1 to 1)
 - feature/date-range
   - better date range presets
   - options

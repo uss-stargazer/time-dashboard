@@ -1,38 +1,35 @@
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
-import dayjs, { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import trackers from '../../../modules/trackers';
-import { Box, Button, Typography, useTheme } from '@mui/material';
+import { Box, Button, useTheme } from '@mui/material';
 import { BarChart } from '@mui/x-charts';
 import type { DashboardPanelProps } from '../modules/definitions';
 import { TrackerError } from '../../../modules/trackers/definitions';
+import useSettings from '../../../hooks/useSettings';
 
 type ClientDataGroup = { clientName: string; hours: number; income: number };
 
 function Monthly({ data, error, money }: DashboardPanelProps) {
   const theme = useTheme();
-  const [month, setMonth] = useState<Dayjs>(() => dayjs().startOf('month'));
+  const settings = useSettings();
+  const endDate = settings.dateRange[1];
+
   const [clientData, setClientData] = useState<ClientDataGroup[] | undefined>(
     undefined,
   );
 
-  const today = dayjs();
-  const fullMonthEnd = month.endOf("month");
-  const monthInProgress = today.isBefore(fullMonthEnd);
-
   useEffect(() => {
     const controller = new AbortController();
-    const monthEnd = dayjs().isBefore(month.endOf("month"))
+    const monthEnd = dayjs().isBefore(endDate.endOf('month'))
       ? dayjs()
-      : month.endOf("month");
+      : endDate.endOf('month');
 
     Promise.all(
       data.clients.map((client) =>
         (async (): Promise<ClientDataGroup> => {
           const hours = await trackers[client.tracker.name]
             .getBillableHours(
-              month,
+              endDate,
               monthEnd,
               // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
               { ...client.tracker, clientName: client.name },
@@ -61,7 +58,7 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
       });
 
     return () => controller.abort();
-  }, [data.clients, month, error]);
+  }, [data.clients, endDate, error]);
 
   return (
     <Box
@@ -73,30 +70,6 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
         gap: 2,
       }}
     >
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          gap: 1,
-        }}
-      >
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DatePicker
-            label='Month'
-            value={month}
-            onChange={(value, { validationError }) =>
-              value && value.isValid() && !validationError && setMonth(value)
-            }
-            views={['month', 'year']}
-            disableFuture
-          />
-        </LocalizationProvider>
-        {monthInProgress && (
-          <Typography variant='caption'>(Current month)</Typography>
-        )}
-      </Box>
-
       {!clientData ? (
         <Button loading />
       ) : (

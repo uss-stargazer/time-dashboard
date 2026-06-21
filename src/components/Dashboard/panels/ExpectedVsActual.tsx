@@ -2,7 +2,6 @@ import {
   Box,
   CircularProgress,
   Paper,
-  Radio,
   Stack,
   Table,
   TableBody,
@@ -11,10 +10,7 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import { Dayjs } from 'dayjs';
-import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import trackers from '../../../modules/trackers';
 import type {
@@ -27,6 +23,7 @@ import {
   getActualValues,
   getExpectedValues,
 } from '../modules/client-computations';
+import useSettings from '../../../hooks/useSettings';
 
 type BillableHoursResult =
   | {
@@ -64,70 +61,13 @@ function fetchBillableHours(
   );
 }
 
-function DateInput({
-  label,
-  value,
-  onChange,
-  validate,
-  presets,
-}: {
-  label: string;
-  value: Dayjs;
-  onChange: (newDate: Dayjs) => void;
-  validate: (newDate: Dayjs) => void | string;
-  presets?: { label: string; onClick: () => void }[];
-}) {
-  const [error, setError] = useState<string | null>(null);
-  return (
-    <Box>
-      <DatePicker
-        label={label}
-        value={value}
-        onChange={(value, { validationError }) => {
-          if (value && value.isValid() && !validationError) {
-            const error = validate(value);
-            if (typeof error === 'string') setError(error);
-            else {
-              setError(null);
-              onChange(value);
-            }
-          }
-        }}
-        disableFuture
-      />
-      {error && (
-        <Typography variant='caption' color='error'>
-          {error}
-        </Typography>
-      )}
-      {presets && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-          {presets.map((preset) => (
-            <Box key={preset.label}>
-              <Radio
-                size='small'
-                checked={false}
-                onClick={preset.onClick}
-                sx={{ p: 0.5 }}
-              />
-              <Typography variant='caption'>{preset.label}</Typography>
-            </Box>
-          ))}
-        </Box>
-      )}
-    </Box>
-  );
-}
-
 function ExpectedVsActual({
   data: initialData,
   error,
   money,
 }: DashboardPanelProps) {
-  const [endDate, setEndDate] = useState<Dayjs>(() => dayjs());
-  const [startDate, setStartDate] = useState<Dayjs>(() =>
-    dayjs().startOf('month'),
-  );
+  const settings = useSettings();
+  const [startDate, endDate] = settings.dateRange;
 
   const [data, setData] = useState<BillableHoursResult>({
     loading: true,
@@ -180,40 +120,6 @@ function ExpectedVsActual({
 
   return (
     <>
-      <Stack gap={1}>
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateInput
-            label='From'
-            value={startDate}
-            onChange={setStartDate}
-            validate={(startDate) => {
-              if (startDate.isAfter(endDate))
-                return 'Start must be before end!';
-            }}
-            presets={[
-              {
-                label: 'month',
-                onClick: () => setStartDate(endDate.startOf('month')),
-              },
-              {
-                label: 'year',
-                onClick: () => setStartDate(endDate.startOf('year')),
-              },
-            ]}
-          />
-          <DateInput
-            label='To'
-            value={endDate}
-            onChange={setEndDate}
-            validate={(endDate) => {
-              if (startDate.isAfter(endDate))
-                return 'Start must be before end!';
-            }}
-            presets={[{ label: 'today', onClick: () => setEndDate(dayjs()) }]}
-          />
-        </LocalizationProvider>
-      </Stack>
-
       <Stack gap={2} sx={{ my: 2 }}>
         <Box>
           <Typography variant='h6'>Over/under</Typography>

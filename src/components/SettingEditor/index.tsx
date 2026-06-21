@@ -1,30 +1,13 @@
-import { Settings } from '@mui/icons-material';
 import {
   AppBar,
   Box,
-  Button,
   GlobalStyles,
   styled,
   SwipeableDrawer,
-  Typography,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState, type PropsWithChildren, type Ref } from 'react';
-import useSettings from '../../hooks/useSettings';
-import ClientEditor from './ClientEditor';
-
-function Editor() {
-  const settings = useSettings();
-
-  if (settings.isLoading) return <Button loading variant='outlined' />;
-
-  // TODO: rough css
-  return (
-    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <ClientEditor />
-    </Box>
-  );
-}
+import Editor from './Editor';
 
 const drawerBleeding = 60;
 const Puller = styled('div')(() => ({

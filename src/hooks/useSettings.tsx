@@ -10,6 +10,8 @@ import {
 import { Box, Button, Typography } from '@mui/material';
 import trackers from '../modules/trackers';
 import SettingsEditor from '../components/SettingEditor';
+import type { Dayjs } from 'dayjs';
+import dayjs from 'dayjs';
 
 const ClientArraySchema = z.array(ClientSchema);
 
@@ -17,6 +19,8 @@ type SettingsContextType = {
   isLoading: boolean;
   clients: Client[];
   setClients: (updated: Client[]) => void;
+  dateRange: [Dayjs, Dayjs];
+  setDateRange: (updated: [Dayjs, Dayjs]) => void;
 };
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
@@ -34,7 +38,12 @@ export function SettingsProvider({
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState<boolean>(false);
   const [clients, setClients] = useState<Client[]>(defaultClients);
+  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => [
+    dayjs().startOf('month'),
+    dayjs(),
+  ]);
 
+  // TODO: load startDate and endDate from local storage
   const loadData = () => {
     setError(null);
     setIsLoading(true);
@@ -132,6 +141,8 @@ export function SettingsProvider({
           isLoading,
           clients,
           setClients: setClientsWStorage,
+          dateRange,
+          setDateRange,
         }}
       >
         {clients.length > 0 && <SettingsEditor />}
@@ -143,6 +154,8 @@ export function SettingsProvider({
         isLoading,
         clients,
         setClients: setClientsWStorage,
+        dateRange,
+        setDateRange,
       }}
     >
       {children}
