@@ -1,30 +1,26 @@
 import dayjs from 'dayjs';
 import { describe, expect, it, vi } from 'vitest';
-import type {
-  ClientWithBillableHours,
-  Money,
-  ParsedClient,
-} from './definitions';
 import { getActualValues, getExpectedValues } from './client-computations';
+import type {
+  ClientStatistics,
+  ClientStatisticsLoaded,
+} from '../hooks/useDashboardState';
 
 vi.mock('./time', () => ({
   getExpectedHours: vi.fn(() => 40),
 }));
 
-const money: Money = {
-  currency: 'USD',
-  format: (amount: number) => `$${amount.toFixed(2)}`,
-};
+const formatMoney = (amount: number) => `$${amount.toFixed(2)}`;
 
-const makeClient = (hourlyRate: number): ParsedClient =>
-  ({ hourlyRate }) as ParsedClient;
+const makeClient = (hourlyRate: number): ClientStatistics =>
+  ({ hourlyRate }) as ClientStatistics;
 
 describe('getExpectedValues', () => {
   const start = dayjs('2026-02-02');
   const end = dayjs('2026-02-06');
 
   it('returns equal min/avg/max for a single client', () => {
-    const result = getExpectedValues(start, end, [makeClient(50)], money);
+    const result = getExpectedValues(start, end, [makeClient(50)], formatMoney);
 
     expect(result.income.min.value).toBe(2000);
     expect(result.income.avg.value).toBe(2000);
@@ -33,7 +29,7 @@ describe('getExpectedValues', () => {
 
   it('computes min/avg/max across multiple clients', () => {
     const clients = [makeClient(40), makeClient(60), makeClient(80)];
-    const result = getExpectedValues(start, end, clients, money);
+    const result = getExpectedValues(start, end, clients, formatMoney);
 
     expect(result.income.min.value).toBe(40 * 40);
     expect(result.income.avg.value).toBe(40 * 60);
@@ -41,14 +37,14 @@ describe('getExpectedValues', () => {
   });
 
   it('formats hours with toFixed(2)', () => {
-    const result = getExpectedValues(start, end, [makeClient(50)], money);
+    const result = getExpectedValues(start, end, [makeClient(50)], formatMoney);
 
     expect(result.hours.display).toBe('40.00');
   });
 
   it('delegates income display to money.format', () => {
     const clients = [makeClient(25), makeClient(75)];
-    const result = getExpectedValues(start, end, clients, money);
+    const result = getExpectedValues(start, end, clients, formatMoney);
 
     expect(result.income.min.display).toBe('$1000.00');
     expect(result.income.avg.display).toBe('$2000.00');
@@ -59,12 +55,8 @@ describe('getExpectedValues', () => {
 const makeBillableClient = (
   hourlyRate: number,
   billableHours: number,
-): ClientWithBillableHours => ({
+): ClientStatisticsLoaded => ({
   name: 'Foo Corp',
-  tracker: {
-    name: 'sample1',
-    data: { workspaceId: 'abc123', apiKey: 'abc123' },
-  },
   hourlyRate,
   billableHours,
 });
@@ -77,9 +69,9 @@ const makeExpected = (
 ) => ({
   hours: { value: hours, display: hours.toFixed(2) },
   income: {
-    min: { value: incomeMin, display: money.format(incomeMin) },
-    avg: { value: incomeAvg, display: money.format(incomeAvg) },
-    max: { value: incomeMax, display: money.format(incomeMax) },
+    min: { value: incomeMin, display: formatMoney(incomeMin) },
+    avg: { value: incomeAvg, display: formatMoney(incomeAvg) },
+    max: { value: incomeMax, display: formatMoney(incomeMax) },
   },
 });
 
@@ -89,7 +81,7 @@ describe('getActualValues', () => {
     const result = getActualValues(
       [makeBillableClient(50, 35)],
       expected,
-      money,
+      formatMoney,
     );
 
     expect(result.hours.value).toBe(35);
@@ -103,7 +95,7 @@ describe('getActualValues', () => {
       makeBillableClient(60, 20),
       makeBillableClient(80, 5),
     ];
-    const result = getActualValues(clients, expected, money);
+    const result = getActualValues(clients, expected, formatMoney);
 
     expect(result.hours.value).toBe(35);
     expect(result.income.value).toBe(10 * 40 + 20 * 60 + 5 * 80);
@@ -114,7 +106,7 @@ describe('getActualValues', () => {
     const result = getActualValues(
       [makeBillableClient(50, 40)],
       expected,
-      money,
+      formatMoney,
     );
 
     expect(result.hours.overUnder.value).toBe(10);
@@ -128,7 +120,7 @@ describe('getActualValues', () => {
     const result = getActualValues(
       [makeBillableClient(50, 20)],
       expected,
-      money,
+      formatMoney,
     );
 
     expect(result.hours.overUnder.value).toBe(-20);
@@ -140,7 +132,7 @@ describe('getActualValues', () => {
     const result = getActualValues(
       [makeBillableClient(50, 12.5)],
       expected,
-      money,
+      formatMoney,
     );
 
     expect(result.hours.display).toBe('12.50');
@@ -152,7 +144,7 @@ describe('getActualValues', () => {
     const result = getActualValues(
       [makeBillableClient(50, 40)],
       expected,
-      money,
+      formatMoney,
     );
 
     expect(result.income.display).toBe('$2000.00');
