@@ -10,113 +10,27 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import { Dayjs } from 'dayjs';
-import { useEffect, useState } from 'react';
-import trackers from '../../../modules/trackers';
-import type {
-  ClientWithBillableHours,
-  DashboardPanelProps,
-  ParsedClient,
-} from '../modules/definitions';
-import { TrackerError } from '../../../modules/trackers/definitions';
 import {
   getActualValues,
   getExpectedValues,
 } from '../modules/client-computations';
 import useSettings from '../../../hooks/useSettings';
+import useDashboardState from '../hooks/useDashboardState';
 
-type BillableHoursResult =
-  | {
-      loading: true;
-      clients: ParsedClient[];
-    }
-  | {
-      loading: false;
-      clients: ClientWithBillableHours[];
-    };
-
-function fetchBillableHours(
-  clients: ParsedClient[],
-  startDate: Dayjs,
-  endDate: Dayjs,
-  signal: AbortSignal,
-): Promise<ClientWithBillableHours[]> {
-  return Promise.all(
-    clients.map(async (client) => {
-      const billableHours = await trackers[client.tracker.name]
-        .getBillableHours(
-          startDate,
-          endDate,
-          // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
-          { ...client.tracker, clientName: client.name },
-          signal,
-        )
-        .catch((error) => {
-          if (error instanceof TrackerError) error.clientName = client.name;
-          throw error;
-        });
-
-      return { ...client, billableHours };
-    }),
-  );
-}
-
-function ExpectedVsActual({
-  data: initialData,
-  error,
-  money,
-}: DashboardPanelProps) {
+function ExpectedVsActual() {
   const settings = useSettings();
+  const state = useDashboardState();
   const [startDate, endDate] = settings.dateRange;
 
-  const [data, setData] = useState<BillableHoursResult>({
-    loading: true,
-    clients: initialData.clients,
-  });
-
-  useEffect(() => {
-    const controller = new AbortController();
-    let timeoutId: number;
-
-    new Promise((resolve) => {
-      setData({ loading: true, clients: initialData.clients });
-      resolve(undefined);
-    })
-      .then(
-        () =>
-          new Promise((resolve) => {
-            // Small buffer timeout to prevent making and aborting a bunch of network calls during rapid changes
-            timeoutId = setTimeout(resolve, 1000);
-          }),
-      )
-      .then(() =>
-        fetchBillableHours(
-          initialData.clients,
-          startDate,
-          endDate,
-          controller.signal,
-        ),
-      )
-      .catch((err) => {
-        controller.abort();
-        error.throw(err);
-        throw err;
-      })
-      .then((clients) => {
-        error.reset();
-        setData({ loading: false, clients });
-      });
-
-    return () => {
-      clearTimeout(timeoutId);
-      controller.abort();
-    };
-  }, [initialData.clients, endDate, error, startDate]);
-
-  const expected = getExpectedValues(startDate, endDate, data.clients, money);
-  const actual = data.loading
+  const expected = getExpectedValues(
+    startDate,
+    endDate,
+    state.clientOutputs,
+    state.money,
+  );
+  const actual = state.error
     ? 'loading'
-    : getActualValues(data.clients, expected, money);
+    : getActualValues(state.clientOutputs, expected, state.money);
 
   return (
     <>
@@ -136,7 +50,7 @@ function ExpectedVsActual({
                   </TableCell>
                 </TableRow>
 
-                {data.clients.length === 1 ? (
+                {state.clientOutputs.length === 1 ? (
                   <TableRow>
                     <TableCell>Income</TableCell>
 
@@ -215,7 +129,7 @@ function ExpectedVsActual({
           <TableContainer component={Paper}>
             <Table>
               <TableBody>
-                {data.clients.length === 1 ? (
+                {state.clientOutputs.length === 1 ? (
                   <TableRow>
                     <TableCell>Expected</TableCell>
 

@@ -13,50 +13,22 @@ import ExpectedVsActual from './panels/ExpectedVsActual';
 import useSettings from '../../hooks/useSettings';
 import { Error as ErrorIcon, Info } from '@mui/icons-material';
 import Monthly from './panels/Monthly';
-import React, { useEffect, useMemo, useState } from 'react';
-import type {
-  DashboardData,
-  DashboardErrorType,
-  DashboardPanelProps,
-  ParsedClient,
-} from './modules/definitions';
+import { useState, type ReactElement } from 'react';
 import trackers from '../../modules/trackers';
 import Card from '../Card';
-import { Convert } from 'easy-currencies';
 import { currencies, type Currency } from '../../modules/currencies';
-import useAsyncError from '../../hooks/useAsyncError';
+import useDashboardState, {
+  DashboardStateProvider,
+} from './hooks/useDashboardState';
 
 function DashboardPanel({
   name,
-  data,
-  universalCurrency,
-  moneyFormatter,
-  Panel,
+  children,
   ...props
-}: Omit<BoxProps, 'children'> & {
+}: BoxProps & {
   name: string;
-  data: DashboardData;
-  universalCurrency: Currency;
-  moneyFormatter: Intl.NumberFormat;
-  Panel: React.FC<DashboardPanelProps>;
 }) {
-  const [error, setError] = useState<DashboardErrorType | undefined>(undefined);
-
-  const errorHandlers = useMemo(
-    () => ({
-      throw: (error: unknown) =>
-        setError(
-          error instanceof Error
-            ? { ...error, message: error.message }
-            : {
-                message: JSON.stringify(error),
-              },
-        ),
-      reset: () => setError(undefined),
-    }),
-    [],
-  );
-
+  const { error } = useDashboardState();
   return (
     <Card
       label={name}
@@ -83,11 +55,7 @@ function DashboardPanel({
           ...props.sx,
         }}
       >
-        <Panel
-          data={data}
-          money={{ currency: universalCurrency, format: moneyFormatter.format }}
-          error={errorHandlers}
-        />
+        {children}
       </Box>
 
       {error && (
@@ -111,43 +79,17 @@ function DashboardPanel({
 
 const dashboardPanelComponents: {
   name: string;
-  fc: React.FC<DashboardPanelProps>;
+  el: ReactElement;
 }[] = [
-  { name: 'Expected v. Actual', fc: ExpectedVsActual },
-  { name: 'Monthly', fc: Monthly },
+  { name: 'Expected v. Actual', el: <ExpectedVsActual /> },
+  { name: 'Monthly', el: <Monthly /> },
 ];
 
 function Dashboard({ sx }: { sx?: SxProps }) {
-  const throwError = useAsyncError();
   const settings = useSettings();
   const [dashboardCurrency, setDashboardCurrency] = useState<Currency>('USD');
-  const [clients, setClients] = useState<ParsedClient[]>([]);
 
-  useEffect(() => {
-    Promise.all(
-      settings.clients
-        .filter((c) => !c.isHidden)
-        .map((c) =>
-          (async () => ({
-            ...c,
-            hourlyRate:
-              c.hourlyRate.currency === dashboardCurrency
-                ? c.hourlyRate.amount
-                : await Convert(c.hourlyRate.amount)
-                    .from(c.hourlyRate.currency)
-                    .to(dashboardCurrency),
-          }))().catch((error) => {
-            throwError(
-              error,
-              `converting ${c.hourlyRate.currency} to ${dashboardCurrency}`,
-            );
-            throw error;
-          }),
-        ),
-    ).then((parsedClients) => setClients(parsedClients));
-  }, [settings.clients, dashboardCurrency, throwError]);
-
-  if (settings.isLoading || clients.length === 0)
+  if (settings.isLoading || settings.clients.length === 0)
     return (
       <Box
         sx={{
@@ -172,10 +114,6 @@ function Dashboard({ sx }: { sx?: SxProps }) {
       </Box>
     );
 
-  const data: DashboardData = {
-    clients: clients as [ParsedClient, ...ParsedClient[]], // clients.length must be greater than zero
-  };
-
   const moneyFormatter = new Intl.NumberFormat(undefined, {
     style: 'currency',
     currency: dashboardCurrency,
@@ -183,52 +121,52 @@ function Dashboard({ sx }: { sx?: SxProps }) {
   });
 
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        gap: 1,
-        ...sx,
-      }}
+    <DashboardStateProvider
+      moneyFormatter={moneyFormatter}
+      universalCurrency={dashboardCurrency}
     >
-      <Box sx={{ display: 'flex', justifyContent: 'left ' }}>
-        <FormControl>
-          <InputLabel>Currency</InputLabel>
-          <Select
-            value={dashboardCurrency}
-            onChange={(event) => setDashboardCurrency(event.target.value)}
-            sx={{ minWidth: 100 }}
-          >
-            {currencies.map((currency) => (
-              <MenuItem key={currency} value={currency}>
-                {currency}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Box>
-
       <Box
         sx={{
           display: 'flex',
-          flexWrap: 'wrap',
-          alignItems: 'flex-start',
-          gap: 3,
-          justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' },
+          flexDirection: 'column',
+          gap: 1,
+          ...sx,
         }}
       >
-        {dashboardPanelComponents.map(({ name, fc }) => (
-          <DashboardPanel
-            key={name}
-            name={name}
-            Panel={fc}
-            data={data}
-            moneyFormatter={moneyFormatter}
-            universalCurrency={dashboardCurrency}
-          />
-        ))}
+        <Box sx={{ display: 'flex', justifyContent: 'left ' }}>
+          <FormControl>
+            <InputLabel>Currency</InputLabel>
+            <Select
+              value={dashboardCurrency}
+              onChange={(event) => setDashboardCurrency(event.target.value)}
+              sx={{ minWidth: 100 }}
+            >
+              {currencies.map((currency) => (
+                <MenuItem key={currency} value={currency}>
+                  {currency}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Box>
+
+        <Box
+          sx={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'flex-start',
+            gap: 3,
+            justifyContent: { xs: 'center', sm: 'center', md: 'flex-start' },
+          }}
+        >
+          {dashboardPanelComponents.map(({ name, el }) => (
+            <DashboardPanel key={name} name={name}>
+              {el}
+            </DashboardPanel>
+          ))}
+        </Box>
       </Box>
-    </Box>
+    </DashboardStateProvider>
   );
 }
 

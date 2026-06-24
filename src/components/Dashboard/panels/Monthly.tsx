@@ -1,64 +1,19 @@
-import dayjs from 'dayjs';
-import { useEffect, useState } from 'react';
-import trackers from '../../../modules/trackers';
 import { Box, Button, useTheme } from '@mui/material';
 import { BarChart } from '@mui/x-charts';
-import type { DashboardPanelProps } from '../modules/definitions';
-import { TrackerError } from '../../../modules/trackers/definitions';
-import useSettings from '../../../hooks/useSettings';
+import useDashboardState from '../hooks/useDashboardState';
 
-type ClientDataGroup = { clientName: string; hours: number; income: number };
-
-function Monthly({ data, error, money }: DashboardPanelProps) {
+function Monthly() {
   const theme = useTheme();
-  const settings = useSettings();
-  const endDate = settings.dateRange[1];
+  const state = useDashboardState();
 
-  const [clientData, setClientData] = useState<ClientDataGroup[] | undefined>(
-    undefined,
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const monthEnd = dayjs().isBefore(endDate.endOf('month'))
-      ? dayjs()
-      : endDate.endOf('month');
-
-    Promise.all(
-      data.clients.map((client) =>
-        (async (): Promise<ClientDataGroup> => {
-          const hours = await trackers[client.tracker.name]
-            .getBillableHours(
-              endDate,
-              monthEnd,
-              // @ts-expect-error TODO: find a better way. At the moment of writing, I'm done trying to get typescript to mesh with this.
-              { ...client.tracker, clientName: client.name },
-              controller.signal,
-            )
-            .catch((error) => {
-              if (error instanceof TrackerError) error.clientName = client.name;
-              throw error;
-            });
-          return {
-            clientName: client.name,
-            hours,
-            income: client.hourlyRate * hours,
-          };
-        })(),
-      ),
-    )
-      .catch((err) => {
-        controller.abort();
-        error.throw(err);
-        throw err;
-      })
-      .then((clientDataGroups) => {
-        error.reset();
-        setClientData(clientDataGroups);
-      });
-
-    return () => controller.abort();
-  }, [data.clients, endDate, error]);
+  const data: { name: string; hours: number; income: number }[] =
+    state.clientOutputs
+      .filter((c) => c.billableHours != undefined)
+      .map((c) => ({
+        ...c,
+        hours: c.billableHours,
+        income: (c.billableHours || 0) * c.hourlyRate,
+      }));
 
   return (
     <Box
@@ -70,18 +25,18 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
         gap: 2,
       }}
     >
-      {!clientData ? (
+      {state.error ? (
         <Button loading />
       ) : (
         <BarChart
           width={300}
-          height={100 + 120 * data.clients.length}
+          height={100 + 120 * data.length}
           sx={{ bgcolor: 'background.paper' }}
           layout='horizontal'
-          dataset={clientData}
+          dataset={data}
           yAxis={[
             {
-              dataKey: 'clientName',
+              dataKey: 'name',
               tickLabelStyle: {
                 angle: -90,
                 textAnchor: 'middle',
@@ -99,7 +54,7 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
               id: 'incomeAxis',
               dataKey: 'income',
               position: 'bottom',
-              label: `Money (${money.currency})`,
+              label: `Money (${state.money.currency})`,
             },
           ]}
           series={[
@@ -113,7 +68,8 @@ function Monthly({ data, error, money }: DashboardPanelProps) {
             {
               dataKey: 'income',
               label: 'Income',
-              valueFormatter: (v) => (v === null ? null : money.format(v)),
+              valueFormatter: (v) =>
+                v === null ? null : state.money.format(v),
               color: theme.palette.success.main,
               xAxisId: 'incomeAxis',
             },
