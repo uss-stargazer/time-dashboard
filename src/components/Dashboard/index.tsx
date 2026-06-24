@@ -10,7 +10,6 @@ import {
 import ExpectedVsActual from './panels/ExpectedVsActual';
 import useSettings from '../../hooks/useSettings';
 import { Error as ErrorIcon, Info } from '@mui/icons-material';
-import Monthly from './panels/Monthly';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { useState } from 'react';
@@ -21,6 +20,7 @@ import Card from '../Card';
 import useDashboardState, {
   DashboardStateProvider,
 } from './hooks/useDashboardState';
+import Comparison from './panels/Comparison';
 
 function DateInput({
   label,
@@ -138,7 +138,7 @@ const dashboardPanelComponents: {
   el: ReactElement;
 }[] = [
   { name: 'Expected v. Actual', el: <ExpectedVsActual /> },
-  { name: 'Monthly', el: <Monthly /> },
+  { name: 'Comparison', el: <Comparison /> },
 ];
 
 function Dashboard({ sx }: { sx?: SxProps }) {

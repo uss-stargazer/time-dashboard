@@ -3,7 +3,7 @@ import { BarChart } from '@mui/x-charts';
 import useDashboardState from '../hooks/useDashboardState';
 import useSettings from '../../../hooks/useSettings';
 
-function Monthly() {
+function Comparison() {
   const theme = useTheme();
   const settings = useSettings();
   const state = useDashboardState();
@@ -81,4 +81,4 @@ function Monthly() {
   );
 }
 
-export default Monthly;
+export default Comparison;
