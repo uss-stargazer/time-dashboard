@@ -5,7 +5,8 @@ import type {
   ClientStatisticsLoaded,
 } from '../hooks/useDashboardState';
 
-type ExpectedValues = ReturnType<typeof getExpectedValues>;
+export type ExpectedValues = ReturnType<typeof getExpectedValues>;
+export type ActualValues = ReturnType<typeof getActualValues>;
 
 export function getExpectedValues(
   startDate: Dayjs,

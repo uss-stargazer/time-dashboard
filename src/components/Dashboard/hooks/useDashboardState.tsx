@@ -10,6 +10,12 @@ import { fetchBillableHours, normalizeHourlyRate } from '../modules/util';
 import type { TrackerName } from '../../../modules/trackers';
 import useSettings from '../../../hooks/useSettings';
 import type { ClientName } from '../../../modules/clients';
+import {
+  getActualValues,
+  getExpectedValues,
+  type ActualValues,
+  type ExpectedValues,
+} from '../modules/client-computations';
 
 export type DashboardErrorType = {
   tracker?: TrackerName;
@@ -35,6 +41,10 @@ type DashboardState = {
         isLoading: false;
         clients: ClientStatisticsLoaded[];
       };
+  overallStats: {
+    expected: ExpectedValues;
+    actual?: ActualValues;
+  };
   error: DashboardErrorType | undefined;
   handleError: {
     throw: (error: unknown) => void;
@@ -46,6 +56,8 @@ const DashboardStateContext = createContext<DashboardState | null>(null);
 
 export function DashboardStateProvider({ children }: PropsWithChildren) {
   const settings = useSettings();
+  const [startDate, endDate] = settings.dateRange;
+
   const [error, setError] = useState<DashboardErrorType | undefined>(undefined);
   const [clientStats, setClientStats] = useState<DashboardState['clientStats']>(
     {
@@ -128,10 +140,21 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
     };
   }, [handleError, settings.clients, settings.dateRange, settings.money]);
 
+  const expected = getExpectedValues(
+    startDate,
+    endDate,
+    clientStats.clients,
+    settings.money.format,
+  );
+  const actual = clientStats.isLoading
+    ? undefined
+    : getActualValues(clientStats.clients, expected, settings.money.format);
+
   return (
     <DashboardStateContext.Provider
       value={{
         clientStats,
+        overallStats: { expected, actual },
         error,
         handleError,
       }}

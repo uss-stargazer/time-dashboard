@@ -10,31 +10,11 @@ import {
   TableRow,
   Typography,
 } from '@mui/material';
-import {
-  getActualValues,
-  getExpectedValues,
-} from '../modules/client-computations';
-import useSettings from '../../../hooks/useSettings';
 import useDashboardState from '../hooks/useDashboardState';
 
 function ExpectedVsActual() {
-  const settings = useSettings();
   const state = useDashboardState();
-  const [startDate, endDate] = settings.dateRange;
-
-  const expected = getExpectedValues(
-    startDate,
-    endDate,
-    state.clientStats.clients,
-    settings.money.format,
-  );
-  const actual = state.clientStats.isLoading
-    ? 'loading'
-    : getActualValues(
-        state.clientStats.clients,
-        expected,
-        settings.money.format,
-      );
+  const { expected, actual } = state.overallStats;
 
   return (
     <>
@@ -49,8 +29,8 @@ function ExpectedVsActual() {
                   <TableCell>Hours</TableCell>
 
                   <TableCell align='right'>
-                    {actual === 'loading' && <CircularProgress size={12} />}
-                    {actual !== 'loading' && actual.hours.overUnder.display}
+                    {!actual && <CircularProgress size={12} />}
+                    {actual && actual.hours.overUnder.display}
                   </TableCell>
                 </TableRow>
 
@@ -59,9 +39,8 @@ function ExpectedVsActual() {
                     <TableCell>Income</TableCell>
 
                     <TableCell align='right'>
-                      {actual === 'loading' && <CircularProgress size={12} />}
-                      {actual !== 'loading' &&
-                        actual.income.overUnder.avg.display}
+                      {!actual && <CircularProgress size={12} />}
+                      {actual && actual.income.overUnder.avg.display}
                     </TableCell>
                   </TableRow>
                 ) : (
@@ -70,9 +49,8 @@ function ExpectedVsActual() {
                       <TableCell>Income (min)</TableCell>
 
                       <TableCell align='right'>
-                        {actual === 'loading' && <CircularProgress size={12} />}
-                        {actual !== 'loading' &&
-                          actual.income.overUnder.min.display}
+                        {!actual && <CircularProgress size={12} />}
+                        {actual && actual.income.overUnder.min.display}
                       </TableCell>
                     </TableRow>
 
@@ -80,9 +58,8 @@ function ExpectedVsActual() {
                       <TableCell>Income (avg)</TableCell>
 
                       <TableCell align='right'>
-                        {actual === 'loading' && <CircularProgress size={12} />}
-                        {actual !== 'loading' &&
-                          actual.income.overUnder.avg.display}
+                        {!actual && <CircularProgress size={12} />}
+                        {actual && actual.income.overUnder.avg.display}
                       </TableCell>
                     </TableRow>
 
@@ -90,9 +67,8 @@ function ExpectedVsActual() {
                       <TableCell>Income (max)</TableCell>
 
                       <TableCell align='right'>
-                        {actual === 'loading' && <CircularProgress size={12} />}
-                        {actual !== 'loading' &&
-                          actual.income.overUnder.max.display}
+                        {!actual && <CircularProgress size={12} />}
+                        {actual && actual.income.overUnder.max.display}
                       </TableCell>
                     </TableRow>
                   </>
@@ -118,8 +94,8 @@ function ExpectedVsActual() {
                   <TableCell>Actual</TableCell>
 
                   <TableCell align='right'>
-                    {actual === 'loading' && <CircularProgress size={12} />}
-                    {actual !== 'loading' && actual.hours.display}
+                    {!actual && <CircularProgress size={12} />}
+                    {actual && actual.hours.display}
                   </TableCell>
                 </TableRow>
               </TableBody>
@@ -173,8 +149,8 @@ function ExpectedVsActual() {
                   <TableCell>Actual</TableCell>
 
                   <TableCell align='right'>
-                    {actual === 'loading' && <CircularProgress size={12} />}
-                    {actual !== 'loading' && actual.income.display}
+                    {!actual && <CircularProgress size={12} />}
+                    {actual && actual.income.display}
                   </TableCell>
                 </TableRow>
               </TableBody>
