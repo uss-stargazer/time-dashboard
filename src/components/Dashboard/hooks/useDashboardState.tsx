@@ -2,7 +2,6 @@ import {
   createContext,
   useContext,
   useEffect,
-  useMemo,
   useState,
   type PropsWithChildren,
 } from 'react';
@@ -33,23 +32,19 @@ export type ClientStatisticsLoaded = ClientStatistics & {
 
 type DashboardState = {
   clientStats:
-    | {
-        isLoading: true;
-        clients: ClientStatistics[];
-      }
-    | {
-        isLoading: false;
-        clients: ClientStatisticsLoaded[];
-      };
+  | {
+    isLoading: true;
+    clients: ClientStatistics[];
+  }
+  | {
+    isLoading: false;
+    clients: ClientStatisticsLoaded[];
+  };
   overallStats: {
     expected: ExpectedValues;
     actual?: ActualValues;
   };
   error: DashboardErrorType | undefined;
-  handleError: {
-    throw: (error: unknown) => void;
-    reset: () => void;
-  };
 };
 
 const DashboardStateContext = createContext<DashboardState | null>(null);
@@ -64,21 +59,6 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
       isLoading: true,
       clients: [],
     },
-  );
-
-  const handleError = useMemo(
-    () => ({
-      throw: (error: unknown) =>
-        setError(
-          error instanceof Error
-            ? { ...error, message: error.message }
-            : {
-                message: JSON.stringify(error),
-              },
-        ),
-      reset: () => setError(undefined),
-    }),
-    [],
   );
 
   useEffect(() => {
@@ -118,13 +98,8 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
           ),
         ),
       )
-      .catch((err) => {
-        controller.abort();
-        handleError.throw(err);
-        throw err;
-      })
       .then((billableHours) => {
-        handleError.reset();
+        setError(undefined);
         setClientStats((clientStats) => ({
           isLoading: false,
           clients: clientStats.clients.map((stats, idx) => ({
@@ -132,13 +107,24 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
             billableHours: billableHours[idx],
           })),
         }));
-      });
+      })
+      .catch((err) => {
+        controller.abort();
+        setError(
+          err instanceof Error
+            ? { ...err, message: err.message }
+            : {
+              message: JSON.stringify(err),
+            },
+        );
+        console.error(err);
+      })
 
     return () => {
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [handleError, settings.clients, settings.dateRange, settings.money]);
+  }, [settings.clients, settings.dateRange, settings.money]);
 
   const expected = getExpectedValues(
     startDate,
@@ -156,7 +142,6 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
         clientStats,
         overallStats: { expected, actual },
         error,
-        handleError,
       }}
     >
       {children}
