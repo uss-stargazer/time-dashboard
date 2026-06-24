@@ -7,7 +7,6 @@ import {
   type BoxProps,
   type SxProps,
 } from '@mui/material';
-import ExpectedVsActual from './panels/ExpectedVsActual';
 import useSettings from '../../hooks/useSettings';
 import { Error as ErrorIcon, Info } from '@mui/icons-material';
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
@@ -21,6 +20,7 @@ import useDashboardState, {
   DashboardStateProvider,
 } from './hooks/useDashboardState';
 import Comparison from './panels/Comparison';
+import Overview from './panels/Overview';
 
 function DateInput({
   label,
@@ -137,7 +137,7 @@ const dashboardPanelComponents: {
   name: string;
   el: ReactElement;
 }[] = [
-  { name: 'Expected v. Actual', el: <ExpectedVsActual /> },
+  { name: 'Overview', el: <Overview /> },
   { name: 'Comparison', el: <Comparison /> },
 ];
 

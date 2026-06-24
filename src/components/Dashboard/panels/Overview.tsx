@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import useDashboardState from '../hooks/useDashboardState';
 
-function ExpectedVsActual() {
+function Overview() {
   const state = useDashboardState();
   const { expected, actual } = state.overallStats;
 
@@ -162,4 +162,4 @@ function ExpectedVsActual() {
   );
 }
 
-export default ExpectedVsActual;
+export default Overview;
