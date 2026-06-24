@@ -115,7 +115,7 @@ function Dashboard({ sx }: { sx?: SxProps }) {
         sx={{
           display: 'flex',
           flexDirection: 'column',
-          gap: 1,
+          gap: 3,
           ...sx,
         }}
       >
