@@ -1,15 +1,50 @@
+import ClientEditor from './ClientEditor';
+import useSettings from '../../hooks/useSettings';
+import { currencies } from '../../modules/currencies';
 import {
   AppBar,
   Box,
+  Button,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   GlobalStyles,
   styled,
   SwipeableDrawer,
 } from '@mui/material';
 import { grey } from '@mui/material/colors';
 import { useState, type PropsWithChildren, type Ref } from 'react';
-import Editor from './Editor';
 
-const drawerBleeding = 60;
+function Editor() {
+  const settings = useSettings();
+  if (settings.isLoading) return <Button loading variant='outlined' />;
+
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.25 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'left ' }}>
+        <FormControl>
+          <InputLabel>Currency</InputLabel>
+          <Select
+            value={settings.money.currency}
+            onChange={(event) => settings.setCurrency(event.target.value)}
+            sx={{ minWidth: 100 }}
+          >
+            {currencies.map((currency) => (
+              <MenuItem key={currency} value={currency}>
+                {currency}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+      </Box>
+
+      <ClientEditor />
+    </Box>
+  );
+}
+
+const drawerBleeding = 25;
 const Puller = styled('div')(() => ({
   width: 30,
   height: 6,
