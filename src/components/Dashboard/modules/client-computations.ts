@@ -1,7 +1,6 @@
 import type { Dayjs } from 'dayjs';
 import { getExpectedHours } from './time';
 import type { ClientOutput } from './util';
-import type { MoneyPreference } from '../../../hooks/useSettings';
 
 type ExpectedValues = ReturnType<typeof getExpectedValues>;
 
@@ -9,7 +8,7 @@ export function getExpectedValues(
   startDate: Dayjs,
   endDate: Dayjs,
   data: ClientOutput[],
-  money: MoneyPreference,
+  formatMoney: (money: number) => string,
 ) {
   const hours = getExpectedHours(startDate, endDate);
   const incomeMin =
@@ -28,15 +27,15 @@ export function getExpectedValues(
     income: {
       min: {
         value: incomeMin,
-        display: money.format(incomeMin),
+        display: formatMoney(incomeMin),
       },
       avg: {
         value: incomeAvg,
-        display: money.format(incomeAvg),
+        display: formatMoney(incomeAvg),
       },
       max: {
         value: incomeMax,
-        display: money.format(incomeMax),
+        display: formatMoney(incomeMax),
       },
     },
   };
@@ -45,7 +44,7 @@ export function getExpectedValues(
 export function getActualValues(
   data: ClientOutput[],
   expected: ExpectedValues,
-  money: MoneyPreference,
+  formatMoney: (money: number) => string,
 ) {
   const clients = data.filter((client) => client.billableHours != undefined);
 
@@ -71,19 +70,19 @@ export function getActualValues(
     },
     income: {
       value: income,
-      display: money.format(income),
+      display: formatMoney(income),
       overUnder: {
         min: {
           value: incomeMinOverUnder,
-          display: money.format(incomeMinOverUnder),
+          display: formatMoney(incomeMinOverUnder),
         },
         avg: {
           value: incomeAvgOverUnder,
-          display: money.format(incomeAvgOverUnder),
+          display: formatMoney(incomeAvgOverUnder),
         },
         max: {
           value: incomeMaxOverUnder,
-          display: money.format(incomeMaxOverUnder),
+          display: formatMoney(incomeMaxOverUnder),
         },
       },
     },

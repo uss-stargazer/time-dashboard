@@ -26,11 +26,11 @@ function ExpectedVsActual() {
     startDate,
     endDate,
     state.clientOutputs,
-    settings.money,
+    settings.money.format,
   );
   const actual = state.error
     ? 'loading'
-    : getActualValues(state.clientOutputs, expected, settings.money);
+    : getActualValues(state.clientOutputs, expected, settings.money.format);
 
   return (
     <>

@@ -16,16 +16,14 @@ import type { Currency } from '../modules/currencies';
 
 const ClientArraySchema = z.array(ClientSchema);
 
-export type MoneyPreference = {
-  currency: Currency;
-  format: (amount: number) => string;
-};
-
 type SettingsContextType = {
   isLoading: boolean;
   clients: Client[];
   dateRange: [Dayjs, Dayjs];
-  money: MoneyPreference;
+  money: {
+    currency: Currency;
+    format: (amount: number) => string;
+  };
   setClients: (updated: Client[]) => void;
   setDateRange: (updated: [Dayjs, Dayjs]) => void;
   setCurrency: (updated: Currency) => void;
