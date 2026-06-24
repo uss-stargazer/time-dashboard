@@ -12,15 +12,23 @@ import trackers from '../modules/trackers';
 import SettingsEditor from '../components/SettingEditor';
 import type { Dayjs } from 'dayjs';
 import dayjs from 'dayjs';
+import type { Currency } from '../modules/currencies';
 
 const ClientArraySchema = z.array(ClientSchema);
+
+export type MoneyPreference = {
+  currency: Currency;
+  format: (amount: number) => string;
+};
 
 type SettingsContextType = {
   isLoading: boolean;
   clients: Client[];
-  setClients: (updated: Client[]) => void;
   dateRange: [Dayjs, Dayjs];
+  money: MoneyPreference;
+  setClients: (updated: Client[]) => void;
   setDateRange: (updated: [Dayjs, Dayjs]) => void;
+  setCurrency: (updated: Currency) => void;
 };
 const SettingsContext = createContext<SettingsContextType | null>(null);
 
@@ -42,6 +50,7 @@ export function SettingsProvider({
     dayjs().startOf('month'),
     dayjs(),
   ]);
+  const [currency, setCurrency] = useState<Currency>('USD');
 
   // TODO: load startDate and endDate from local storage
   const loadData = () => {
@@ -99,6 +108,23 @@ export function SettingsProvider({
     setClients(updated);
   };
 
+  const dashboardState = {
+    isLoading,
+    clients,
+    dateRange,
+    money: {
+      currency,
+      format: new Intl.NumberFormat(undefined, {
+        style: 'currency',
+        currency,
+        currencySign: 'accounting',
+      }).format,
+    },
+    setClients: setClientsWStorage,
+    setDateRange,
+    setCurrency,
+  };
+
   return error ? (
     <Box
       sx={{
@@ -136,28 +162,12 @@ export function SettingsProvider({
         </Typography>
       )}
 
-      <SettingsContext.Provider
-        value={{
-          isLoading,
-          clients,
-          setClients: setClientsWStorage,
-          dateRange,
-          setDateRange,
-        }}
-      >
+      <SettingsContext.Provider value={dashboardState}>
         {clients.length > 0 && <SettingsEditor />}
       </SettingsContext.Provider>
     </Box>
   ) : (
-    <SettingsContext.Provider
-      value={{
-        isLoading,
-        clients,
-        setClients: setClientsWStorage,
-        dateRange,
-        setDateRange,
-      }}
-    >
+    <SettingsContext.Provider value={dashboardState}>
       {children}
     </SettingsContext.Provider>
   );

@@ -13,10 +13,10 @@ import ExpectedVsActual from './panels/ExpectedVsActual';
 import useSettings from '../../hooks/useSettings';
 import { Error as ErrorIcon, Info } from '@mui/icons-material';
 import Monthly from './panels/Monthly';
-import { useState, type ReactElement } from 'react';
+import { type ReactElement } from 'react';
 import trackers from '../../modules/trackers';
 import Card from '../Card';
-import { currencies, type Currency } from '../../modules/currencies';
+import { currencies } from '../../modules/currencies';
 import useDashboardState, {
   DashboardStateProvider,
 } from './hooks/useDashboardState';
@@ -87,7 +87,6 @@ const dashboardPanelComponents: {
 
 function Dashboard({ sx }: { sx?: SxProps }) {
   const settings = useSettings();
-  const [dashboardCurrency, setDashboardCurrency] = useState<Currency>('USD');
 
   if (settings.isLoading || settings.clients.length === 0)
     return (
@@ -114,17 +113,8 @@ function Dashboard({ sx }: { sx?: SxProps }) {
       </Box>
     );
 
-  const moneyFormatter = new Intl.NumberFormat(undefined, {
-    style: 'currency',
-    currency: dashboardCurrency,
-    currencySign: 'accounting',
-  });
-
   return (
-    <DashboardStateProvider
-      moneyFormatter={moneyFormatter}
-      universalCurrency={dashboardCurrency}
-    >
+    <DashboardStateProvider>
       <Box
         sx={{
           display: 'flex',
@@ -137,8 +127,8 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           <FormControl>
             <InputLabel>Currency</InputLabel>
             <Select
-              value={dashboardCurrency}
-              onChange={(event) => setDashboardCurrency(event.target.value)}
+              value={settings.money.currency}
+              onChange={(event) => settings.setCurrency(event.target.value)}
               sx={{ minWidth: 100 }}
             >
               {currencies.map((currency) => (

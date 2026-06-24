@@ -1,7 +1,7 @@
 import type { Dayjs } from 'dayjs';
 import { getExpectedHours } from './time';
-import type { Money } from '../hooks/useDashboardState';
 import type { ClientOutput } from './util';
+import type { MoneyPreference } from '../../../hooks/useSettings';
 
 type ExpectedValues = ReturnType<typeof getExpectedValues>;
 
@@ -9,7 +9,7 @@ export function getExpectedValues(
   startDate: Dayjs,
   endDate: Dayjs,
   data: ClientOutput[],
-  money: Money,
+  money: MoneyPreference,
 ) {
   const hours = getExpectedHours(startDate, endDate);
   const incomeMin =
@@ -45,7 +45,7 @@ export function getExpectedValues(
 export function getActualValues(
   data: ClientOutput[],
   expected: ExpectedValues,
-  money: Money,
+  money: MoneyPreference,
 ) {
   const clients = data.filter((client) => client.billableHours != undefined);
 

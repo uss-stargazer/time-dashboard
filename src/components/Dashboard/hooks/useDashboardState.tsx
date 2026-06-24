@@ -11,14 +11,8 @@ import {
   parseClients,
   type ClientOutput,
 } from '../modules/util';
-import type { Currency } from '../../../modules/currencies';
 import type { TrackerName } from '../../../modules/trackers';
 import useSettings from '../../../hooks/useSettings';
-
-export type Money = {
-  currency: Currency;
-  format: (amount: number) => string;
-};
 
 export type DashboardErrorType = {
   tracker?: TrackerName;
@@ -28,7 +22,6 @@ export type DashboardErrorType = {
 
 type DashboardState = {
   clientOutputs: ClientOutput[];
-  money: Money;
   error: DashboardErrorType | undefined;
   handleError: {
     throw: (error: unknown) => void;
@@ -38,14 +31,7 @@ type DashboardState = {
 
 const DashboardStateContext = createContext<DashboardState | null>(null);
 
-export function DashboardStateProvider({
-  universalCurrency,
-  moneyFormatter,
-  children,
-}: PropsWithChildren<{
-  universalCurrency: Currency;
-  moneyFormatter: Intl.NumberFormat;
-}>) {
+export function DashboardStateProvider({ children }: PropsWithChildren) {
   const settings = useSettings();
 
   const [clientOutputs, setClientOutputs] = useState<ClientOutput[]>([]);
@@ -75,7 +61,7 @@ export function DashboardStateProvider({
       timeoutId = setTimeout(resolve, 1000);
     })
       // First pass simply parsing stuff
-      .then(() => parseClients(settings.clients, universalCurrency))
+      .then(() => parseClients(settings.clients, settings.money.currency))
       .then((unfetchedOutputs) => {
         setClientOutputs(unfetchedOutputs);
         return unfetchedOutputs;
@@ -104,13 +90,12 @@ export function DashboardStateProvider({
       clearTimeout(timeoutId);
       controller.abort();
     };
-  }, [settings.clients, settings.dateRange, handleError, universalCurrency]);
+  }, [handleError, settings.clients, settings.dateRange, settings.money]);
 
   return (
     <DashboardStateContext.Provider
       value={{
         clientOutputs,
-        money: { currency: universalCurrency, format: moneyFormatter.format },
         error,
         handleError,
       }}

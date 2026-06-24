@@ -1,9 +1,11 @@
 import { Box, Button, useTheme } from '@mui/material';
 import { BarChart } from '@mui/x-charts';
 import useDashboardState from '../hooks/useDashboardState';
+import useSettings from '../../../hooks/useSettings';
 
 function Monthly() {
   const theme = useTheme();
+  const settings = useSettings();
   const state = useDashboardState();
 
   const data: { name: string; hours: number; income: number }[] =
@@ -11,7 +13,7 @@ function Monthly() {
       .filter((c) => c.billableHours != undefined)
       .map((c) => ({
         ...c,
-        hours: c.billableHours,
+        hours: c.billableHours || 0,
         income: (c.billableHours || 0) * c.hourlyRate,
       }));
 
@@ -54,7 +56,7 @@ function Monthly() {
               id: 'incomeAxis',
               dataKey: 'income',
               position: 'bottom',
-              label: `Money (${state.money.currency})`,
+              label: `Money (${settings.money.currency})`,
             },
           ]}
           series={[
@@ -69,7 +71,7 @@ function Monthly() {
               dataKey: 'income',
               label: 'Income',
               valueFormatter: (v) =>
-                v === null ? null : state.money.format(v),
+                v === null ? null : settings.money.format(v),
               color: theme.palette.success.main,
               xAxisId: 'incomeAxis',
             },
