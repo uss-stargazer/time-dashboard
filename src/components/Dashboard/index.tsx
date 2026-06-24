@@ -1,10 +1,6 @@
 import {
   Box,
   Button,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
   Typography,
   type BoxProps,
   type SxProps,
@@ -16,7 +12,6 @@ import Monthly from './panels/Monthly';
 import { type ReactElement } from 'react';
 import trackers from '../../modules/trackers';
 import Card from '../Card';
-import { currencies } from '../../modules/currencies';
 import useDashboardState, {
   DashboardStateProvider,
 } from './hooks/useDashboardState';
@@ -123,23 +118,6 @@ function Dashboard({ sx }: { sx?: SxProps }) {
           ...sx,
         }}
       >
-        <Box sx={{ display: 'flex', justifyContent: 'left ' }}>
-          <FormControl>
-            <InputLabel>Currency</InputLabel>
-            <Select
-              value={settings.money.currency}
-              onChange={(event) => settings.setCurrency(event.target.value)}
-              sx={{ minWidth: 100 }}
-            >
-              {currencies.map((currency) => (
-                <MenuItem key={currency} value={currency}>
-                  {currency}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        </Box>
-
         <Box
           sx={{
             display: 'flex',
