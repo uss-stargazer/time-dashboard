@@ -25,12 +25,16 @@ function ExpectedVsActual() {
   const expected = getExpectedValues(
     startDate,
     endDate,
-    state.clientOutputs,
+    state.clientStats.clients,
     settings.money.format,
   );
-  const actual = state.error
+  const actual = state.clientStats.isLoading
     ? 'loading'
-    : getActualValues(state.clientOutputs, expected, settings.money.format);
+    : getActualValues(
+        state.clientStats.clients,
+        expected,
+        settings.money.format,
+      );
 
   return (
     <>
@@ -50,7 +54,7 @@ function ExpectedVsActual() {
                   </TableCell>
                 </TableRow>
 
-                {state.clientOutputs.length === 1 ? (
+                {state.clientStats.clients.length === 1 ? (
                   <TableRow>
                     <TableCell>Income</TableCell>
 
@@ -129,7 +133,7 @@ function ExpectedVsActual() {
           <TableContainer component={Paper}>
             <Table>
               <TableBody>
-                {state.clientOutputs.length === 1 ? (
+                {state.clientStats.clients.length === 1 ? (
                   <TableRow>
                     <TableCell>Expected</TableCell>
 

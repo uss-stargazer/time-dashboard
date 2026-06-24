@@ -8,14 +8,13 @@ function Monthly() {
   const settings = useSettings();
   const state = useDashboardState();
 
-  const data: { name: string; hours: number; income: number }[] =
-    state.clientOutputs
-      .filter((c) => c.billableHours != undefined)
-      .map((c) => ({
-        ...c,
-        hours: c.billableHours || 0,
-        income: (c.billableHours || 0) * c.hourlyRate,
-      }));
+  const data =
+    !state.clientStats.isLoading &&
+    state.clientStats.clients.map((c) => ({
+      name: c.name,
+      hours: c.billableHours,
+      income: c.billableHours * c.hourlyRate,
+    }));
 
   return (
     <Box
@@ -27,7 +26,7 @@ function Monthly() {
         gap: 2,
       }}
     >
-      {state.error ? (
+      {!data ? (
         <Button loading />
       ) : (
         <BarChart

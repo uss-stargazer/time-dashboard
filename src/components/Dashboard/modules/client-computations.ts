@@ -1,13 +1,16 @@
 import type { Dayjs } from 'dayjs';
 import { getExpectedHours } from './time';
-import type { ClientOutput } from './util';
+import type {
+  ClientStatistics,
+  ClientStatisticsLoaded,
+} from '../hooks/useDashboardState';
 
 type ExpectedValues = ReturnType<typeof getExpectedValues>;
 
 export function getExpectedValues(
   startDate: Dayjs,
   endDate: Dayjs,
-  data: ClientOutput[],
+  data: ClientStatistics[],
   formatMoney: (money: number) => string,
 ) {
   const hours = getExpectedHours(startDate, endDate);
@@ -42,17 +45,15 @@ export function getExpectedValues(
 }
 
 export function getActualValues(
-  data: ClientOutput[],
+  clients: ClientStatisticsLoaded[],
   expected: ExpectedValues,
   formatMoney: (money: number) => string,
 ) {
-  const clients = data.filter((client) => client.billableHours != undefined);
-
-  const hours = clients.reduce((sum, client) => sum + client.billableHours!, 0);
+  const hours = clients.reduce((sum, client) => sum + client.billableHours, 0);
   const hoursOverUnder = hours - expected.hours.value;
 
   const income = clients.reduce(
-    (sum, client) => sum + client.billableHours! * client.hourlyRate,
+    (sum, client) => sum + client.billableHours * client.hourlyRate,
     0,
   );
   const incomeAvgOverUnder = income - expected.income.avg.value;
