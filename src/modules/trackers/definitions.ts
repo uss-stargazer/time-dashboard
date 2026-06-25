@@ -13,9 +13,13 @@ type GetBillableHours<ClientData> = (
 export class TrackerError extends Error {
   public tracker: TrackerName;
   public clientName?: string;
-  constructor(tracker: TrackerName, message?: string) {
+  // Set when the underlying failure was rate limiting; drives the UI's
+  // "auto-retrying" message and the dashboard's scheduled retry.
+  public retryAfterMs?: number;
+  constructor(tracker: TrackerName, message?: string, retryAfterMs?: number) {
     super(message);
     this.tracker = tracker;
+    this.retryAfterMs = retryAfterMs;
   }
 }
 

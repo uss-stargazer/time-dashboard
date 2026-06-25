@@ -1,6 +1,7 @@
 import z from 'zod';
 import { makeTracker, TrackerError } from './definitions';
 import type { Dayjs } from 'dayjs';
+import { rateLimitedFetch, RateLimitError } from '../rateLimitedFetch';
 
 const TimeReportResponseSchema = z.object({
   results: z.array(
@@ -25,7 +26,7 @@ const fetchUser = async (
     access_token: data.accessToken,
     account_id: data.accountId,
   }).toString();
-  const response = await fetch(url, {
+  const response = await rateLimitedFetch(url, {
     headers: {
       'User-Agent': `${data.apiUserCompany} Integration (${data.apiUserEmail})`,
     },
@@ -56,7 +57,7 @@ const fetchTotalBillableHoursForClient = async (
     from: from.format('YYYYMMDD'),
     to: to.format('YYYYMMDD'),
   }).toString();
-  const response = await fetch(url, {
+  const response = await rateLimitedFetch(url, {
     headers: {
       'Harvest-Account-ID': data.accountId,
       Authorization: `Bearer ${data.accessToken}`,
@@ -116,6 +117,7 @@ const harvest = makeTracker({
         throw new TrackerError(
           'harvest',
           error instanceof Error ? error.message : JSON.stringify(error),
+          error instanceof RateLimitError ? error.retryAfterMs : undefined,
         );
       });
       return {};
@@ -141,6 +143,7 @@ const harvest = makeTracker({
       throw new TrackerError(
         'harvest',
         error instanceof Error ? error.message : JSON.stringify(error),
+        error instanceof RateLimitError ? error.retryAfterMs : undefined,
       );
     });
   },

@@ -59,9 +59,11 @@ function DashboardPanel({
           <Box sx={{ display: 'flex', gap: 1 }}>
             <ErrorIcon color='error' fontSize='small' />
             <Typography color='error.main' variant='caption'>
-              {error.tracker
-                ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ''}`
-                : 'Some error'}
+              {error.retryAfterMs !== undefined
+                ? `${error.tracker ? `${trackers[error.tracker].prettyName} API` : 'API'} rate limit reached`
+                : error.tracker
+                  ? `${trackers[error.tracker].prettyName} tracker didn't like client${error.clientName ? ` '${error.clientName}'` : ''}`
+                  : 'Some error'}
             </Typography>
           </Box>
           <Typography variant='caption' m={1}>

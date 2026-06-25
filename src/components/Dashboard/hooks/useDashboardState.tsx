@@ -2,11 +2,13 @@ import {
   createContext,
   useContext,
   useEffect,
+  useRef,
   useState,
   type PropsWithChildren,
 } from 'react';
 import { fetchBillableHours, normalizeHourlyRate } from '../modules/util';
 import type { TrackerName } from '../../../modules/trackers';
+import { TrackerError } from '../../../modules/trackers/definitions';
 import useSettings from '../../../hooks/useSettings';
 import type { ClientName } from '../../../modules/clients';
 import {
@@ -20,6 +22,9 @@ export type DashboardErrorType = {
   tracker?: TrackerName;
   clientName?: string;
   message: string;
+  // Present when the error is rate limiting; the dashboard auto-retries after
+  // this delay and the UI shows a distinct "rate limited" message.
+  retryAfterMs?: number;
 };
 
 export type ClientStatistics = {
@@ -60,6 +65,9 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
       clients: [],
     },
   );
+  // Bumped to re-run the fetch effect when a rate-limit cooldown elapses.
+  const [retryNonce, setRetryNonce] = useState(0);
+  const retryTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   useEffect(() => {
     const clients = settings.clients.filter((c) => !c.isHidden);
@@ -103,20 +111,38 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
       })
       .catch((err) => {
         controller.abort();
-        setError(
-          err instanceof Error
-            ? { ...err, message: err.message }
-            : {
-              message: JSON.stringify(err),
-            },
-        );
+        const retryAfterMs =
+          err instanceof TrackerError ? err.retryAfterMs : undefined;
+        if (retryAfterMs !== undefined) {
+          setError({
+            tracker: err.tracker,
+            message: 'Rate limited — auto-retrying shortly.',
+            retryAfterMs,
+          });
+          // Self-heal once the cooldown passes. If still rate limited, the
+          // re-run trips the breaker again and reschedules (a cheap probe per
+          // cooldown, since an open breaker rejects without touching the API).
+          retryTimeout.current = setTimeout(
+            () => setRetryNonce((n) => n + 1),
+            retryAfterMs,
+          );
+        } else {
+          setError(
+            err instanceof Error
+              ? { ...err, message: err.message }
+              : {
+                message: JSON.stringify(err),
+              },
+          );
+        }
         console.error(err);
       })
 
     return () => {
+      clearTimeout(retryTimeout.current);
       controller.abort();
     };
-  }, [settings.clients, settings.dateRange, settings.money]);
+  }, [settings.clients, settings.dateRange, settings.money, retryNonce]);
 
   const expected = getExpectedValues(
     startDate,

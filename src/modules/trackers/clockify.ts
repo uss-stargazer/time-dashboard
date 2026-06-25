@@ -1,6 +1,7 @@
 import z from 'zod';
 import type { Dayjs } from 'dayjs';
 import { makeTracker, TrackerError } from './definitions';
+import { rateLimitedFetch, RateLimitError } from '../rateLimitedFetch';
 
 const SECONDS_PER_HOUR = 60 * 60;
 
@@ -20,7 +21,7 @@ const fetchClientId = async (
     `https://docs.clockify.me/api/v1/workspaces/${data.workspaceId}/clients`,
   );
   url.search = new URLSearchParams({ name: clientName }).toString();
-  const response = await fetch(url, {
+  const response = await rateLimitedFetch(url, {
     method: 'GET',
     headers: {
       'x-api-key': data.apiKey,
@@ -48,7 +49,7 @@ const fetchTotalBillableHoursForClient = async (
   data: { workspaceId: string; apiKey: string; clientId: string },
   signal?: AbortSignal,
 ): Promise<number> => {
-  const response = await fetch(
+  const response = await rateLimitedFetch(
     `https://reports.api.clockify.me/v1/workspaces/${data.workspaceId}/reports/summary`,
     {
       method: 'POST',
@@ -110,6 +111,7 @@ const clockify = makeTracker({
           throw new TrackerError(
             'clockify',
             error instanceof Error ? error.message : JSON.stringify(error),
+            error instanceof RateLimitError ? error.retryAfterMs : undefined,
           );
         },
       ),
@@ -131,6 +133,7 @@ const clockify = makeTracker({
       throw new TrackerError(
         'clockify',
         error instanceof Error ? error.message : JSON.stringify(error),
+        error instanceof RateLimitError ? error.retryAfterMs : undefined,
       );
     });
   },
