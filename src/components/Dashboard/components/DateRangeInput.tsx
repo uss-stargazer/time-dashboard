@@ -1,6 +1,6 @@
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import {
@@ -104,7 +104,8 @@ function DateRangeInput() {
 
   const [option, setOption] = useState<TimeRangeOption>('Month to Date');
 
-  useEffect(() => {
+  const selectOption = (option: TimeRangeOption) => {
+    setOption(option);
     switch (option) {
       case 'Week to Date':
         settings.setDateRange([dayjs().startOf('week'), dayjs()]);
@@ -131,7 +132,7 @@ function DateRangeInput() {
         settings.setDateRange([dayjs().subtract(30, 'days'), dayjs()]);
         break;
     }
-  }, [option]);
+  };
 
   return (
     <Box sx={{ display: 'flex' }}>
@@ -141,7 +142,7 @@ function DateRangeInput() {
           label='Date Range'
           value={option}
           onChange={(option) => {
-            setOption(option.target.value);
+            selectOption(option.target.value);
           }}
         >
           {timeRangeOptions.map((option) => (
