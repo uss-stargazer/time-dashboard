@@ -64,18 +64,11 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     const clients = settings.clients.filter((c) => !c.isHidden);
     const controller = new AbortController();
-    let timeoutId: number;
 
-    new Promise((resolve) => {
-      // Small buffer timeout to prevent making and aborting a bunch of network calls during rapid changes
-      timeoutId = setTimeout(resolve, 1000);
-    })
-      // First pass simply converting currency
-      .then(() =>
-        Promise.all(
-          clients.map((c) => normalizeHourlyRate(c, settings.money.currency)),
-        ),
-      )
+    // First pass simply converting currency
+    Promise.all(
+      clients.map((c) => normalizeHourlyRate(c, settings.money.currency)),
+    )
       .then((hourlyRates) =>
         setClientStats({
           isLoading: true,
@@ -121,7 +114,6 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
       })
 
     return () => {
-      clearTimeout(timeoutId);
       controller.abort();
     };
   }, [settings.clients, settings.dateRange, settings.money]);

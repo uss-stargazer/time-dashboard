@@ -1,6 +1,7 @@
 import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
+import { useDebouncedCallback } from 'use-debounce';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import {
   Box,
@@ -27,18 +28,29 @@ function DateInput({
   presets?: { label: string; onClick: () => void }[];
 }) {
   const [error, setError] = useState<string | null>(null);
+  // Display the typed value immediately, but debounce committing it upstream so
+  // rapid custom entry doesn't thrash the data fetch. Presets commit instantly.
+  const [localValue, setLocalValue] = useState<Dayjs>(value);
+  const [prevValue, setPrevValue] = useState<Dayjs>(value);
+  if (value !== prevValue) {
+    setPrevValue(value);
+    setLocalValue(value);
+  }
+  const commit = useDebouncedCallback(onChange, 1000);
+
   return (
     <Box>
       <DatePicker
         label={label}
-        value={value}
+        value={localValue}
         onChange={(value, { validationError }) => {
           if (value && value.isValid() && !validationError) {
             const error = validate(value);
             if (typeof error === 'string') setError(error);
             else {
               setError(null);
-              onChange(value);
+              setLocalValue(value);
+              commit(value);
             }
           }
         }}
@@ -56,7 +68,10 @@ function DateInput({
               <Radio
                 size='small'
                 checked={false}
-                onClick={preset.onClick}
+                onClick={() => {
+                  commit.cancel();
+                  preset.onClick();
+                }}
                 sx={{ p: 0.5 }}
               />
               <Typography variant='caption'>{preset.label}</Typography>
