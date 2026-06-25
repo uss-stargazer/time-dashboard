@@ -9,7 +9,6 @@ import {
   MenuItem,
   Radio,
   Select,
-  Stack,
   Typography,
 } from '@mui/material';
 import useSettings from '../../../hooks/useSettings';
@@ -67,10 +66,6 @@ function DateInput({
       )}
     </Box>
   );
-}
-
-function custom() {
-  return <Stack gap={1}></Stack>;
 }
 
 const timeRangeOptions = [
