@@ -39,10 +39,11 @@ function DateInput({
   const commit = useDebouncedCallback(onChange, 1000);
 
   return (
-    <Box>
+    <Box sx={{ flexGrow: 1, flexBasis: { xs: '100%', sm: 'auto' } }}>
       <DatePicker
         label={label}
         value={localValue}
+        sx={{ width: '100%' }}
         onChange={(value, { validationError }) => {
           if (value && value.isValid() && !validationError) {
             const error = validate(value);
@@ -136,7 +137,7 @@ function DateRangeInput() {
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-      <FormControl>
+      <FormControl sx={{ width: { xs: '100%', sm: 'auto' }, minWidth: { sm: 140 } }}>
         <InputLabel>Date Range</InputLabel>
         <Select
           label='Date Range'
@@ -154,7 +155,14 @@ function DateRangeInput() {
       </FormControl>
 
       {option === 'Custom' && (
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 2,
+            flexWrap: 'wrap',
+            width: { xs: '100%', sm: 'auto' },
+          }}
+        >
           <LocalizationProvider dateAdapter={AdapterDayjs}>
             <DateInput
               label='From'
