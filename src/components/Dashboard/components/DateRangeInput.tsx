@@ -102,7 +102,7 @@ function DateRangeInput() {
   const setStartDate = (d: Dayjs) => settings.setDateRange([d, endDate]);
   const setEndDate = (d: Dayjs) => settings.setDateRange([startDate, d]);
 
-  const [option, setOption] = useState<TimeRangeOption>('Month to Date');
+  const [option, setOption] = useState<TimeRangeOption>(timeRangeOptions[0]);
 
   const selectOption = (option: TimeRangeOption) => {
     setOption(option);
