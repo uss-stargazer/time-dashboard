@@ -18,7 +18,7 @@ function Overview() {
 
   return (
     <>
-      <Stack gap={2} sx={{ my: 2 }}>
+      <Stack gap={2} sx={{ my: 2, width: '100%' }}>
         <Box>
           <Typography variant='h6'>Over/under</Typography>
 

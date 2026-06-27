@@ -31,6 +31,7 @@ function DashboardPanel({
       sx={{
         borderColor: 'primary.main',
         maxWidth: undefined,
+        width: { xs: '100%', md: 'auto' },
         display: 'flex',
         flexDirection: 'column',
         gap: 1,
@@ -46,7 +47,7 @@ function DashboardPanel({
             md: 'row',
           },
           justifyContent: 'center',
-          alignItems: 'center',
+          alignItems: 'stretch',
           gap: 1,
           ...props.sx,
         }}

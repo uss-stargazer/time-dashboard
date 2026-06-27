@@ -2,6 +2,7 @@ import {
   Box,
   Button,
   createTheme,
+  CssBaseline,
   ThemeProvider,
   Typography,
 } from '@mui/material';
@@ -26,7 +27,7 @@ function ErrorFallback({ error }: { error: unknown }) {
   return (
     <Box
       sx={{
-        width: '100vw',
+        width: '100%',
         height: '100vh',
         display: 'flex',
         flexDirection: 'column',
@@ -71,11 +72,11 @@ function Splash({ children }: PropsWithChildren) {
     <Box>
       <Box
         sx={{
-          position: 'absolute',
+          position: 'fixed',
           top: 0,
           left: 0,
           zIndex: 10000,
-          width: '100vw',
+          width: '100%',
           height: '100vh',
           display: 'flex',
           flexDirection: 'column',
@@ -114,13 +115,14 @@ function Splash({ children }: PropsWithChildren) {
 function App() {
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <Splash>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <SettingsProvider>
             <Box
               sx={{
                 minHeight: '100vh',
-                width: '100vw',
+                width: '100%',
                 display: 'flex',
                 flexDirection: 'column',
               }}

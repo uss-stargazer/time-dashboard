@@ -21,16 +21,16 @@ function Comparison() {
       sx={{
         display: 'flex',
         flexDirection: 'column',
-        alignItems: 'center',
+        alignItems: 'stretch',
         justifyContent: 'center',
         gap: 2,
+        width: { xs: '100%', md: 300 },
       }}
     >
       {!data ? (
-        <Button loading />
+        <Button loading sx={{ alignSelf: 'center' }} />
       ) : (
         <BarChart
-          width={300}
           height={100 + 120 * data.length}
           sx={{ bgcolor: 'background.paper' }}
           layout='horizontal'
