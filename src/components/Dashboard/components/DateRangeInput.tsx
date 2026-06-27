@@ -135,7 +135,7 @@ function DateRangeInput() {
   };
 
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
       <FormControl>
         <InputLabel>Date Range</InputLabel>
         <Select
@@ -154,37 +154,39 @@ function DateRangeInput() {
       </FormControl>
 
       {option === 'Custom' && (
-        <LocalizationProvider dateAdapter={AdapterDayjs}>
-          <DateInput
-            label='From'
-            value={startDate}
-            onChange={setStartDate}
-            validate={(startDate) => {
-              if (startDate.isAfter(endDate))
-                return 'Start must be before end!';
-            }}
-            presets={[
-              {
-                label: 'month',
-                onClick: () => setStartDate(endDate.startOf('month')),
-              },
-              {
-                label: 'year',
-                onClick: () => setStartDate(endDate.startOf('year')),
-              },
-            ]}
-          />
-          <DateInput
-            label='To'
-            value={endDate}
-            onChange={setEndDate}
-            validate={(endDate) => {
-              if (startDate.isAfter(endDate))
-                return 'Start must be before end!';
-            }}
-            presets={[{ label: 'today', onClick: () => setEndDate(dayjs()) }]}
-          />
-        </LocalizationProvider>
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            <DateInput
+              label='From'
+              value={startDate}
+              onChange={setStartDate}
+              validate={(startDate) => {
+                if (startDate.isAfter(endDate))
+                  return 'Start must be before end!';
+              }}
+              presets={[
+                {
+                  label: 'month',
+                  onClick: () => setStartDate(endDate.startOf('month')),
+                },
+                {
+                  label: 'year',
+                  onClick: () => setStartDate(endDate.startOf('year')),
+                },
+              ]}
+            />
+            <DateInput
+              label='To'
+              value={endDate}
+              onChange={setEndDate}
+              validate={(endDate) => {
+                if (startDate.isAfter(endDate))
+                  return 'Start must be before end!';
+              }}
+              presets={[{ label: 'today', onClick: () => setEndDate(dayjs()) }]}
+            />
+          </LocalizationProvider>
+        </Box>
       )}
     </Box>
   );
