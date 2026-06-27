@@ -13,7 +13,7 @@ function Comparison() {
     state.clientStats.clients.map((c) => ({
       name: c.name,
       hours: c.billableHours,
-      income: c.billableHours * c.hourlyRate,
+      income: c.income,
     }));
 
   return (

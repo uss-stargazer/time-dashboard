@@ -6,6 +6,8 @@ import {
   Select,
   TextField,
 } from '@mui/material';
+import { DatePicker } from '@mui/x-date-pickers';
+import dayjs from 'dayjs';
 import {
   Controller,
   type Control,
@@ -23,6 +25,7 @@ export type FormFieldProps<FormData extends FieldValues> = {
   control: Control<FormData>;
   options?: RegisterOptions<FormData, Path<FormData>>;
   onChangeCb?: (value: unknown) => void;
+  fullWidth?: boolean;
 };
 
 export function FormTextField<FormData extends FieldValues>({
@@ -66,6 +69,7 @@ export function FormNumberField<FormData extends FieldValues>({
   control,
   options,
   onChangeCb,
+  fullWidth,
 }: FormFieldProps<FormData>) {
   return (
     <Controller
@@ -78,6 +82,7 @@ export function FormNumberField<FormData extends FieldValues>({
       }) => (
         <NumberField
           allowFloat
+          fullWidth={fullWidth}
           label={camelCaseToTitle(name.split('.').at(-1)!)}
           value={value}
           onValueChange={(change) => {
@@ -90,6 +95,43 @@ export function FormNumberField<FormData extends FieldValues>({
           inputRef={ref}
           helperText={error && error.message}
           errorMessage={error?.message}
+        />
+      )}
+    />
+  );
+}
+
+export function FormDateField<FormData extends FieldValues>({
+  name,
+  control,
+  options,
+  label,
+  fullWidth,
+}: FormFieldProps<FormData> & { label?: string }) {
+  return (
+    <Controller
+      name={name}
+      control={control}
+      rules={options}
+      render={({
+        field: { value, onChange, onBlur },
+        fieldState: { error },
+      }) => (
+        <DatePicker
+          label={label ?? camelCaseToTitle(name.split('.').at(-1)!)}
+          // Stored as a 'YYYY-MM-DD' string; the picker speaks Dayjs.
+          value={value ? dayjs(value) : null}
+          onChange={(date) =>
+            onChange(date && date.isValid() ? date.format('YYYY-MM-DD') : '')
+          }
+          slotProps={{
+            textField: {
+              onBlur,
+              error: !!error,
+              helperText: error?.message,
+              fullWidth,
+            },
+          }}
         />
       )}
     />

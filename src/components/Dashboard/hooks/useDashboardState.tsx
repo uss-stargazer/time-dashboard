@@ -6,11 +6,15 @@ import {
   useState,
   type PropsWithChildren,
 } from 'react';
-import { fetchBillableHours, normalizeHourlyRate } from '../modules/util';
+import {
+  fetchClientSegments,
+  normalizeRates,
+  type RateSegment,
+} from '../modules/util';
 import type { TrackerName } from '../../../modules/trackers';
 import { TrackerError } from '../../../modules/trackers/definitions';
 import useSettings from '../../../hooks/useSettings';
-import type { ClientName } from '../../../modules/clients';
+import type { ClientName, Rate } from '../../../modules/clients';
 import {
   getActualValues,
   getExpectedValues,
@@ -29,10 +33,15 @@ export type DashboardErrorType = {
 
 export type ClientStatistics = {
   name: ClientName;
-  hourlyRate: number;
+  // Rate schedule, already converted to the display currency.
+  rates: Rate[];
 };
 export type ClientStatisticsLoaded = ClientStatistics & {
   billableHours: number;
+  segments: RateSegment[];
+  // Income reduced once here (Σ segment.hours × segment.rate) so panels and
+  // the overall totals read it rather than re-multiplying.
+  income: number;
 };
 
 type DashboardState = {
@@ -73,25 +82,28 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
     const clients = settings.clients.filter((c) => !c.isHidden);
     const controller = new AbortController();
 
-    // First pass simply converting currency
+    // First pass: convert each client's rate schedule to the display currency.
+    let normalizedRates: Rate[][] = [];
     Promise.all(
-      clients.map((c) => normalizeHourlyRate(c, settings.money.currency)),
+      clients.map((c) => normalizeRates(c, settings.money.currency)),
     )
-      .then((hourlyRates) =>
+      .then((rates) => {
+        normalizedRates = rates;
         setClientStats({
           isLoading: true,
           clients: clients.map((client, idx) => ({
             name: client.name,
-            hourlyRate: hourlyRates[idx],
+            rates: rates[idx],
           })),
-        }),
-      )
-      // Then actually process the outputs for billableHours
+        });
+      })
+      // Then fetch billable hours per rate period and pair them with rates.
       .then(() =>
         Promise.all(
-          clients.map((c) =>
-            fetchBillableHours(
+          clients.map((c, idx) =>
+            fetchClientSegments(
               c,
+              normalizedRates[idx],
               settings.dateRange[0],
               settings.dateRange[1],
               controller.signal,
@@ -99,14 +111,19 @@ export function DashboardStateProvider({ children }: PropsWithChildren) {
           ),
         ),
       )
-      .then((billableHours) => {
+      .then((segmentsPerClient) => {
         setError(undefined);
         setClientStats((clientStats) => ({
           isLoading: false,
-          clients: clientStats.clients.map((stats, idx) => ({
-            ...stats,
-            billableHours: billableHours[idx],
-          })),
+          clients: clientStats.clients.map((stats, idx) => {
+            const segments = segmentsPerClient[idx];
+            return {
+              ...stats,
+              segments,
+              billableHours: segments.reduce((sum, s) => sum + s.hours, 0),
+              income: segments.reduce((sum, s) => sum + s.hours * s.rate, 0),
+            };
+          }),
         }));
       })
       .catch((err) => {

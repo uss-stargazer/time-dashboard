@@ -1,4 +1,5 @@
 import {
+  EPOCH_SENTINEL,
   UncomputedClientSchema,
   type UncomputedClient,
 } from '../../modules/clients';
@@ -6,12 +7,22 @@ import trackers, {
   trackerNames,
   type TrackerName,
 } from '../../modules/trackers';
-import { FormProvider, useForm, useFormContext } from 'react-hook-form';
+import {
+  FormProvider,
+  useFieldArray,
+  useForm,
+  useFormContext,
+} from 'react-hook-form';
 import { useState } from 'react';
 import { zodResolver } from '@hookform/resolvers/zod';
+import dayjs from 'dayjs';
+import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
+import { LocalizationProvider } from '@mui/x-date-pickers';
 import type { KeyOfUnion } from '../../modules/util';
-import { Box, Button } from '@mui/material';
+import { Box, Button, IconButton, Typography } from '@mui/material';
+import { Add, Close } from '@mui/icons-material';
 import {
+  FormDateField,
   FormNumberField,
   FormSelectField,
   FormTextField,
@@ -64,13 +75,20 @@ function ClientForm({
   const form = useForm<UncomputedClient>({
     resolver: zodResolver(UncomputedClientSchema),
     defaultValues: {
-      hourlyRate: { currency: 'USD', ...client.hourlyRate },
+      rateCurrency: client.rateCurrency ?? 'USD',
+      rates: client.rates ?? [
+        { amount: undefined as unknown as number, effectiveFrom: EPOCH_SENTINEL },
+      ],
       ...client,
     },
   });
   const [trackerName, setTrackerName] = useState<TrackerName | undefined>(
     client.tracker?.name,
   );
+  const rateFields = useFieldArray({ control: form.control, name: 'rates' });
+  const ratesError =
+    form.formState.errors.rates?.message ??
+    form.formState.errors.rates?.root?.message;
 
   const trackerOptions = trackerNames.map((tracker) => ({
     value: tracker,
@@ -95,20 +113,80 @@ function ClientForm({
             name='name'
             control={form.control}
           />
-          <Box sx={{ display: 'flex' }}>
-            <FormNumberField
-              placeholder='Rate amount'
-              name='hourlyRate.amount'
-              control={form.control}
-            />
-            <FormSelectField
-              placeholder='Currency'
-              name='hourlyRate.currency'
-              control={form.control}
-              items={currencies.map((code) => ({ label: code, value: code }))}
-              minWidth={130}
-            />
-          </Box>
+          <FormSelectField
+            placeholder='Currency'
+            name='rateCurrency'
+            control={form.control}
+            items={currencies.map((code) => ({ label: code, value: code }))}
+            minWidth={130}
+          />
+          <LocalizationProvider dateAdapter={AdapterDayjs}>
+            {rateFields.fields.map((field, idx) => (
+              <Box
+                key={field.id}
+                sx={{ display: 'flex', gap: 1, alignItems: 'center' }}
+              >
+                {/* Amount has a fixed width so it's identical on every row;
+                    the second column (date or label) flexes, and the remove
+                    button gets a reserved column. This keeps the baseline row
+                    aligned with the dated rows. */}
+                <Box sx={{ width: 100, flexShrink: 0 }}>
+                  <FormNumberField
+                    name={`rates.${idx}.amount`}
+                    control={form.control}
+                    fullWidth
+                  />
+                </Box>
+                <Box sx={{ flex: 1, minWidth: 0, maxWidth: 220 }}>
+                  {idx === 0 ? (
+                    // The baseline rate has no meaningful "effective from" and
+                    // is always present, so it's neither dated nor removable.
+                    <Typography
+                      variant='caption'
+                      color='text.secondary'
+                      sx={{ display: 'block', width: '100%', textAlign: 'center' }}
+                    >
+                      Initial rate
+                    </Typography>
+                  ) : (
+                    <FormDateField
+                      name={`rates.${idx}.effectiveFrom`}
+                      control={form.control}
+                      label='Effective from'
+                      fullWidth
+                    />
+                  )}
+                </Box>
+                <IconButton
+                  size='small'
+                  aria-label='Remove rate change'
+                  onClick={() => rateFields.remove(idx)}
+                  // Reserve the column on the baseline row so widths stay even.
+                  sx={{ visibility: idx === 0 ? 'hidden' : 'visible' }}
+                >
+                  <Close fontSize='small' />
+                </IconButton>
+              </Box>
+            ))}
+            {ratesError && (
+              <Typography variant='caption' color='error'>
+                {ratesError}
+              </Typography>
+            )}
+            <Button
+              size='small'
+              startIcon={<Add />}
+              sx={{ alignSelf: 'flex-start' }}
+              onClick={() =>
+                rateFields.append({
+                  amount: 0,
+                  effectiveFrom: dayjs().format('YYYY-MM-DD'),
+                })
+              }
+            >
+              Add rate change
+            </Button>
+          </LocalizationProvider>
           <FormSelectField
             name='tracker.name'
             control={form.control}

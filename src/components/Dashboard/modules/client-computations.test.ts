@@ -1,6 +1,7 @@
 import dayjs from 'dayjs';
 import { describe, expect, it, vi } from 'vitest';
 import { getActualValues, getExpectedValues } from './client-computations';
+import { EPOCH_SENTINEL } from '../../../modules/clients';
 import type {
   ClientStatistics,
   ClientStatisticsLoaded,
@@ -12,8 +13,10 @@ vi.mock('./time', () => ({
 
 const formatMoney = (amount: number) => `$${amount.toFixed(2)}`;
 
-const makeClient = (hourlyRate: number): ClientStatistics =>
-  ({ hourlyRate }) as ClientStatistics;
+const makeClient = (hourlyRate: number): ClientStatistics => ({
+  name: 'Foo Corp',
+  rates: [{ amount: hourlyRate, effectiveFrom: EPOCH_SENTINEL }],
+});
 
 describe('getExpectedValues', () => {
   const start = dayjs('2026-02-02');
@@ -57,8 +60,12 @@ const makeBillableClient = (
   billableHours: number,
 ): ClientStatisticsLoaded => ({
   name: 'Foo Corp',
-  hourlyRate,
+  rates: [{ amount: hourlyRate, effectiveFrom: EPOCH_SENTINEL }],
   billableHours,
+  segments: [
+    { hours: billableHours, rate: hourlyRate, effectiveFrom: EPOCH_SENTINEL },
+  ],
+  income: hourlyRate * billableHours,
 });
 
 const makeExpected = (
