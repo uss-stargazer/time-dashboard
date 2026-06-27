@@ -127,7 +127,7 @@ function App() {
                 flexDirection: 'column',
               }}
             >
-              <Dashboard sx={{ flexGrow: 1, p: 2 }} />
+              <Dashboard sx={{ flexGrow: 1, p: 2, pt: 3 }} />
               <SettingsEditor />
             </Box>
           </SettingsProvider>
