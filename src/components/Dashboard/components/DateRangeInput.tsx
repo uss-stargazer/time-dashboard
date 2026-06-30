@@ -12,7 +12,7 @@ import {
   Select,
   Typography,
 } from '@mui/material';
-import useSettings from '../../../hooks/useSettings';
+import useSettings, { dateRangePresets } from '../../../hooks/useSettings';
 
 function DateInput({
   label,
@@ -85,55 +85,17 @@ function DateInput({
 }
 
 const timeRangeOptions = [
-  'Week to Date',
-  'Last 30 Days',
-  'Month to Date',
-  'Year to Date',
-  'This Week',
-  'This Month',
-  'This Year',
+  ...dateRangePresets.map((p) => p.key),
   'Custom',
 ] as const;
-
-type TimeRangeOption = (typeof timeRangeOptions)[number];
 
 function DateRangeInput() {
   const settings = useSettings();
   const [startDate, endDate] = settings.dateRange;
-  const setStartDate = (d: Dayjs) => settings.setDateRange([d, endDate]);
-  const setEndDate = (d: Dayjs) => settings.setDateRange([startDate, d]);
-
-  const [option, setOption] = useState<TimeRangeOption>(timeRangeOptions[0]);
-
-  const selectOption = (option: TimeRangeOption) => {
-    setOption(option);
-    switch (option) {
-      case 'Week to Date':
-        settings.setDateRange([dayjs().startOf('week'), dayjs()]);
-        break;
-      case 'Month to Date':
-        settings.setDateRange([dayjs().startOf('month'), dayjs()]);
-        break;
-      case 'Year to Date':
-        settings.setDateRange([dayjs().startOf('year'), dayjs()]);
-        break;
-      case 'This Week':
-        settings.setDateRange([dayjs().startOf('week'), dayjs().endOf('week')]);
-        break;
-      case 'This Month':
-        settings.setDateRange([
-          dayjs().startOf('month'),
-          dayjs().endOf('month'),
-        ]);
-        break;
-      case 'This Year':
-        settings.setDateRange([dayjs().startOf('year'), dayjs().endOf('year')]);
-        break;
-      case 'Last 30 Days':
-        settings.setDateRange([dayjs().subtract(30, 'days'), dayjs()]);
-        break;
-    }
-  };
+  const setStartDate = (d: Dayjs) =>
+    settings.setSelection({ preset: 'Custom', range: [d, endDate] });
+  const setEndDate = (d: Dayjs) =>
+    settings.setSelection({ preset: 'Custom', range: [startDate, d] });
 
   return (
     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
@@ -141,9 +103,16 @@ function DateRangeInput() {
         <InputLabel>Date Range</InputLabel>
         <Select
           label='Date Range'
-          value={option}
-          onChange={(option) => {
-            selectOption(option.target.value);
+          value={settings.selection.preset}
+          onChange={(event) => {
+            const key = event.target.value;
+            // Switching into Custom seeds the editable range from whatever the
+            // outgoing selection currently resolves to, so the dates don't jump.
+            settings.setSelection(
+              key === 'Custom'
+                ? { preset: 'Custom', range: settings.dateRange }
+                : { preset: key },
+            );
           }}
         >
           {timeRangeOptions.map((option) => (
@@ -154,7 +123,7 @@ function DateRangeInput() {
         </Select>
       </FormControl>
 
-      {option === 'Custom' && (
+      {settings.selection.preset === 'Custom' && (
         <Box
           sx={{
             display: 'flex',

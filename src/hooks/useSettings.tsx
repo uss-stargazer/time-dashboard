@@ -4,6 +4,7 @@ import {
   createContext,
   useContext,
   useEffect,
+  useMemo,
   useState,
   type PropsWithChildren,
 } from 'react';
@@ -16,16 +17,49 @@ import type { Currency } from '../modules/currencies';
 
 const ClientArraySchema = z.array(ClientSchema);
 
+// Ordered table of relative date-range presets. The first entry is the boot
+// default. Each resolves against "now" when read, so relative ranges never go
+// stale; only 'Custom' (kept out of this table) carries a stored tuple.
+export const dateRangePresets = [
+  { key: 'Week to Date', resolve: () => [dayjs().startOf('week'), dayjs()] },
+  { key: 'Last 30 Days', resolve: () => [dayjs().subtract(30, 'days'), dayjs()] },
+  { key: 'Month to Date', resolve: () => [dayjs().startOf('month'), dayjs()] },
+  { key: 'Year to Date', resolve: () => [dayjs().startOf('year'), dayjs()] },
+  {
+    key: 'This Week',
+    resolve: () => [dayjs().startOf('week'), dayjs().endOf('week')],
+  },
+  {
+    key: 'This Month',
+    resolve: () => [dayjs().startOf('month'), dayjs().endOf('month')],
+  },
+  {
+    key: 'This Year',
+    resolve: () => [dayjs().startOf('year'), dayjs().endOf('year')],
+  },
+] as const satisfies { key: string; resolve: () => [Dayjs, Dayjs] }[];
+
+type RelativePreset = (typeof dateRangePresets)[number]['key'];
+
+export type DateSelection =
+  | { preset: RelativePreset }
+  | { preset: 'Custom'; range: [Dayjs, Dayjs] };
+
+const presetByKey = Object.fromEntries(
+  dateRangePresets.map((p) => [p.key, p]),
+) as Record<RelativePreset, (typeof dateRangePresets)[number]>;
+
 type SettingsContextType = {
   isLoading: boolean;
   clients: Client[];
+  selection: DateSelection;
   dateRange: [Dayjs, Dayjs];
   money: {
     currency: Currency;
     format: (amount: number) => string;
   };
   setClients: (updated: Client[]) => void;
-  setDateRange: (updated: [Dayjs, Dayjs]) => void;
+  setSelection: (updated: DateSelection) => void;
   setCurrency: (updated: Currency) => void;
 };
 const SettingsContext = createContext<SettingsContextType | null>(null);
@@ -44,10 +78,20 @@ export function SettingsProvider({
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState<boolean>(false);
   const [clients, setClients] = useState<Client[]>(defaultClients);
-  const [dateRange, setDateRange] = useState<[Dayjs, Dayjs]>(() => [
-    dayjs().startOf('month'),
-    dayjs(),
-  ]);
+  const [selection, setSelection] = useState<DateSelection>({
+    preset: dateRangePresets[0].key,
+  });
+  // Derive the concrete range from the selection, memoized on `selection` so the
+  // reference is stable across renders (the dashboard fetch effect keys on it).
+  // Relative presets re-resolve only when the selection changes — never every
+  // render, which would thrash the fetch.
+  const dateRange = useMemo<[Dayjs, Dayjs]>(
+    () =>
+      selection.preset === 'Custom'
+        ? selection.range
+        : presetByKey[selection.preset].resolve(),
+    [selection],
+  );
   const [currency, setCurrency] = useState<Currency>('USD');
 
   // TODO: load startDate and endDate from local storage
@@ -109,6 +153,7 @@ export function SettingsProvider({
   const dashboardState = {
     isLoading,
     clients,
+    selection,
     dateRange,
     money: {
       currency,
@@ -119,7 +164,7 @@ export function SettingsProvider({
       }).format,
     },
     setClients: setClientsWStorage,
-    setDateRange,
+    setSelection,
     setCurrency,
   };
 
