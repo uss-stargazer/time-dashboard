@@ -55,7 +55,6 @@ function DateInput({
             }
           }
         }}
-        disableFuture
       />
       {error && (
         <Typography variant='caption' color='error'>
