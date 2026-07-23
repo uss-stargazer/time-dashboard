@@ -3,31 +3,33 @@ import react from '@vitejs/plugin-react';
 import { VitePWA, type ManifestOptions } from 'vite-plugin-pwa';
 import pkg from './package.json' with { type: 'json' };
 
+const base = '/time-dashboard/';
+
 const manifest: Partial<ManifestOptions> = {
   name: pkg.name,
   short_name: pkg.name,
   description: pkg.description,
-  scope: '/time-dashboard',
-  start_url: '/time-dashboard',
+  scope: base,
+  start_url: base,
   display: 'standalone',
   icons: [
     {
-      src: '/images/icon/192x192.png',
+      src: `${base}images/icon/192x192.png`,
       sizes: '192x192',
       type: 'image/png',
     },
     {
-      src: '/images/icon/256x256.png',
+      src: `${base}images/icon/256x256.png`,
       sizes: '256x256',
       type: 'image/png',
     },
     {
-      src: '/images/icon/384x384.png',
+      src: `${base}images/icon/384x384.png`,
       sizes: '384x384',
       type: 'image/png',
     },
     {
-      src: '/images/icon/512x512.png',
+      src: `${base}images/icon/512x512.png`,
       sizes: '512x512',
       type: 'image/png',
     },
@@ -48,5 +50,5 @@ export default defineConfig({
       includeAssets: ['images/*'],
     }),
   ],
-  base: '/time-dashboard/',
+  base,
 });
